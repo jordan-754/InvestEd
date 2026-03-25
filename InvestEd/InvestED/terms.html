@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — InvestEd</title>
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=DM+Serif+Display&display=swap">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --green: #2E7D32;
+      --green-pale: #E8F5E9;
+      --text: #1A2B1A;
+      --text-light: #4A6050;
+      --white: #FFFFFF;
+      --border: #D8E8D0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F8FAF5; /* Match your landing page off-white */
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Navbar Styling */
+    nav {
+      background: var(--white);
+      padding: 0 60px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 20px; font-weight: 800;
+      color: var(--text);
+    }
+    .brand span { color: var(--green); }
+
+    /* Layout Container */
+    .container {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    /* Content Card */
+    .content-card {
+      background: var(--white);
+      padding: 50px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(46, 125, 50, 0.05);
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 42px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .last-updated {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 40px;
+      display: block;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 35px;
+      margin-bottom: 12px;
+      color: var(--text);
+      border-left: 4px solid var(--green);
+      padding-left: 15px;
+    }
+
+    p, li {
+      color: var(--text-light);
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    ul { padding-left: 20px; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 24px;
+      transition: transform 0.2s;
+    }
+    .back-link:hover { transform: translateX(-5px); }
+
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+      font-size: 13px;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      nav { padding: 0 20px; }
+      .content-card { padding: 30px 20px; }
+      h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="brand">
+      <img src="assets/logo.png" alt="InvestEd Logo" width="34" style="border-radius: 8px;">
+      <span>InvestEd</span>
+    </a>
+  </nav>
+
+  <div class="container">
+    <a href="index.html" class="back-link">
+      <i data-lucide="arrow-left" style="width: 18px;"></i> Back to Home
+    </a>
+
+    <div class="content-card">
+      <h1>Terms of Service</h1>
+      <span class="last-updated">Last Updated: January 30, 2025</span>
+
+      <p>By using the InvestEd platform, you agree to the following terms. Please read them carefully as they outline our educational mission and your responsibilities as a student user.</p>
+
+      <h2>1. Educational Purpose</h2>
+      <p>InvestEd is an educational tool designed to help Filipino students learn financial literacy. While we simulate investment scenarios, all financial decisions made within the app should be handled with care. We are not licensed financial advisors and this app is for academic and personal growth purposes.</p>
+
+      <h2>2. User Eligibility</h2>
+      <p>This platform is intended specifically for students. By creating an account, you represent that you are currently enrolled in an educational institution and are using the app for personal learning purposes only.</p>
+
+      <h2>3. Minimum Investment (₱20)</h2>
+      <p>Our "Micro-Investing" feature allows users to start with as little as ₱20. Users are responsible for ensuring they have the funds available via their chosen payment method (GCash, Maya, etc.) before initiating any transaction within the app.</p>
+
+      <h2>4. Limitation of Liability</h2>
+      <p>InvestEd provides the platform "as is." While we strive for 100% accuracy in our learning modules and balance tracking, we are not liable for any technical glitches or external market changes that affect simulated data.</p>
+
+      <h2>5. Account Responsibility</h2>
+      <p>You are responsible for maintaining the confidentiality of your login credentials. Notify us immediately if you suspect any unauthorized access to your student account.</p>
+
+      <h2>6. Termination of Use</h2>
+      <p>We reserve the right to suspend or terminate access to any user who violates these terms or uses the platform for fraudulent activities.</p>
+
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);">
+        <p style="font-size: 14px;"><strong>Questions?</strong> Contact the InvestEd team at <a href="mailto:terms@invested-ph.com" style="color: var(--green);">terms@invested-ph.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 InvestEd. All rights reserved. <br>
+    Built with ❤️ for Filipino Students.
+  </footer>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
