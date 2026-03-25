@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/otp_box_background.xml -->
+<!-- Rounded box for each OTP digit input -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/white" />
+    <stroke
+        android:width="1.5dp"
+        android:color="@color/otpBoxBorder" />
+    <corners android:radius="8dp" />
+</shape>

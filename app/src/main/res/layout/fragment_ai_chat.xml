@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true">
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_back"
+            android:padding="8dp"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Financial Chatbot"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Chat messages -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false" />
+
+    <!-- Typing indicator -->
+    <TextView
+        android:id="@+id/tvTypingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AI is typing..."
+        android:textColor="@color/colorPrimary"
+        android:textSize="12sp"
+        android:paddingStart="16dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone" />
+
+    <!-- Quick suggestion chips moved near bottom, above input -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSavings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saving tips"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipInvest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="How to invest"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBudget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Budgeting"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipGoals"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Goals"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipEmergency"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Emergency Fund"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipNextSteps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next steps"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipWeeklyPlan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Weekly plan" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- No text input: chat is driven only by quick suggestion chips above -->
+
+</LinearLayout>

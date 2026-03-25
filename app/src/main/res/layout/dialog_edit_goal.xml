@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Goal"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#3F51B5"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Goal Title"
+        android:textSize="13sp"
+        android:textColor="@android:color/darker_gray" />
+
+    <EditText
+        android:id="@+id/etEditTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="e.g. Emergency Fund"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Target Amount -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Target Amount (₱)"
+        android:textSize="13sp"
+        android:textColor="@android:color/darker_gray" />
+
+    <EditText
+        android:id="@+id/etEditTarget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:hint="e.g. 50000"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Deadline row: label + selected date + "Edit" text button -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Deadline"
+        android:textSize="13sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:id="@+id/tvEditDeadline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+        <!-- Text-only "Edit" button for the date picker -->
+        <Button
+            android:id="@+id/btnPickDate"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
+            android:textSize="13sp"
+            android:textColor="#3F51B5"
+            android:textStyle="bold"
+            android:minWidth="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="0dp" />
+
+    </LinearLayout>
+
+    <!-- Progress indicator -->
+    <ProgressBar
+        android:id="@+id/progressEditSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Action buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            style="?attr/borderlessButtonStyle"
+            android:id="@+id/btnCancelEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="#3F51B5"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnSaveEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save Changes"
+            android:backgroundTint="#3F51B5"
+            android:textColor="@android:color/white" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tvRewardCost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+        <TextView
+            android:id="@+id/tvRewardPesos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="@color/colorPrimary" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnExchangeReward"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="Exchange"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>
