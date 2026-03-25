@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvestEd – Dashboard</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ===== NAVBAR LINKS ===== */
+    .nav-link {
+      position: relative;
+      font-weight: 500;
+      color: #4b5563;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #16a34a;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 0%;
+      height: 2px;
+      background: #16a34a;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .nav-link.active {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn:active { transform: scale(0.95); }
+
+    .btn-outline {
+      border: 1px solid #d1d5db;
+      background: transparent;
+      color: #111827;
+    }
+
+    .btn-outline:hover {
+      background: #16a34a;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 35px rgba(0,0,0,0.15);
+    }
+
+    .stat-card {
+      cursor: pointer;
+    }
+
+    .stat-card.active {
+      border: 2px solid #16a34a;
+      box-shadow: 0 16px 30px rgba(22, 163, 74, 0.2);
+    }
+
+    .action-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(-8px);
+      transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.25s ease, margin 0.25s ease;
+      margin-bottom: 0;
+    }
+
+    .action-panel.open {
+      max-height: 260px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-bottom: 4rem;
+    }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .profile-btn-pop {
+      animation: profileBtnPop 0.22s ease;
+    }
+
+    .profile-dropdown {
+      transform-origin: top left;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .profile-dropdown.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @keyframes profileBtnPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+
+<!-- ================= NAVBAR ================= -->
+<header class="fixed top-0 w-full bg-white/80 backdrop-blur border-b z-50">
+  <div id="profileMenuContainer" class="fixed top-3 left-3 z-[60]">
+    <button id="profileBtn" type="button"
+      class="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:border-green-600 hover:text-green-600 transition flex items-center justify-center"
+      aria-label="Open profile menu">
+      <i data-lucide="user-circle-2" class="w-6 h-6"></i>
+    </button>
+
+    <div id="profileDropdown" class="profile-dropdown hidden absolute left-0 mt-3 w-64 bg-white border border-gray-200 rounded-xl shadow-xl p-4">
+      <p class="text-sm text-gray-500">Profile</p>
+      <p class="font-semibold text-gray-900 mt-1">Shean User</p>
+      <p class="text-sm text-gray-600">shean@example.com</p>
+      <div class="h-px bg-gray-200 my-3"></div>
+      <p class="text-sm text-gray-700">Account Type: Student</p>
+      <p class="text-sm text-gray-700">Status: Active</p>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+
+    <div class="flex items-center gap-2"><img src="../assets/logo.png" class="w-10 h-10 object-contain" />
+      <span class="font-bold text-xl">InvestEd</span>
+    </div>
+
+    <nav class="hidden md:flex gap-8 font-medium">
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="goals.html" class="nav-link">My Goals</a>
+      <a href="budget.html" class="nav-link">Budget Tracker</a>
+      <a href="learning.html" class="nav-link">Learning Hub</a>
+      <a href="../pages/auth/login.html" class="text-red-500 font-medium">Logout</a>
+    </nav>
+
+  </div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="flex-grow">
+
+<section class="pt-32 pb-20 reveal">
+  <div class="max-w-7xl mx-auto px-4">
+
+    <div class="mb-12">
+      <h1 class="text-4xl font-bold mb-2">Welcome back, User 👋</h1>
+      <p class="text-gray-600">Here’s your financial overview</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="grid md:grid-cols-3 gap-8 mb-16">
+
+      <div id="totalBalanceCard" class="stat-card card bg-white p-8 rounded-2xl shadow">
+        <div class="flex items-center gap-4 mb-4 text-green-600">
+          <i data-lucide="wallet" class="w-10 h-10"></i>
+          <h3 class="text-lg font-semibold">Total Balance</h3>
+        </div>
+        <p class="text-4xl font-bold">
+          ₱<span id="totalBalanceValue" class="counter" data-target="2450">0</span>
+        </p>
+      </div>
+
+      <div id="savingsCard" class="stat-card card bg-white p-8 rounded-2xl shadow">
+        <div class="flex items-center gap-4 mb-4 text-blue-600">
+          <i data-lucide="piggy-bank" class="w-10 h-10"></i>
+          <h3 class="text-lg font-semibold">Savings</h3>
+        </div>
+        <p class="text-4xl font-bold">
+          ₱<span id="savingsValue" class="counter" data-target="1800">0</span>
+        </p>
+      </div>
+
+      <div id="investedCard" class="stat-card card bg-white p-8 rounded-2xl shadow">
+        <div class="flex items-center gap-4 mb-4 text-purple-600">
+          <i data-lucide="trending-up" class="w-10 h-10"></i>
+          <h3 class="text-lg font-semibold">Invested</h3>
+        </div>
+        <p class="text-4xl font-bold">
+          ₱<span id="investedValue" class="counter" data-target="650">0</span>
+        </p>
+      </div>
+
+    </div>
+
+    <div id="cardActionPanel" class="action-panel bg-white rounded-2xl shadow p-6">
+      <h3 id="cardActionTitle" class="text-xl font-semibold mb-3">Card Action</h3>
+      <p id="cardActionHint" class="text-sm text-gray-600 mb-4"></p>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="cardAmountInput" type="number" min="1" placeholder="Enter amount" class="w-full sm:w-64 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <button id="cardActionButton" type="button" class="btn btn-outline w-full sm:w-auto"></button>
+      </div>
+      <p id="cardActionMessage" class="text-sm mt-3"></p>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="grid md:grid-cols-4 gap-8">
+
+      <div class="card bg-white p-8 rounded-2xl shadow text-center">
+        <i data-lucide="target" class="w-12 h-12 mx-auto mb-4 text-green-600"></i>
+        <h3 class="text-xl font-semibold mb-3">My Goals</h3>
+        <p class="text-gray-600 mb-6">Track your savings goals</p>
+        <a href="goals.html" class="btn btn-outline w-full">Open</a>
+      </div>
+
+      <div class="card bg-white p-8 rounded-2xl shadow text-center">
+        <i data-lucide="pie-chart" class="w-12 h-12 mx-auto mb-4 text-blue-600"></i>
+        <h3 class="text-xl font-semibold mb-3">Budget Tracker</h3>
+        <p class="text-gray-600 mb-6">Monitor your spending</p>
+        <a href="budget.html" class="btn btn-outline w-full">Open</a>
+      </div>
+
+      <div class="card bg-white p-8 rounded-2xl shadow text-center">
+        <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-4 text-purple-600"></i>
+        <h3 class="text-xl font-semibold mb-3">Learning Hub</h3>
+        <p class="text-gray-600 mb-6">Grow your knowledge</p>
+        <a href="learning.html" class="btn btn-outline w-full">Open</a>
+      </div>
+
+      <div class="card bg-white p-8 rounded-2xl shadow text-center">
+        <i data-lucide="plus-circle" class="w-12 h-12 mx-auto mb-4 text-orange-600"></i>
+        <h3 class="text-xl font-semibold mb-3">Add Funds</h3>
+        <p class="text-gray-600 mb-6">Deposit to your wallet</p>
+        <button class="btn btn-outline w-full">Add</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-gray-900 text-gray-400 py-10 text-center">
+  <p>© 2025 InvestEd. All rights reserved.</p>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+  lucide.createIcons();
+
+  const counters = document.querySelectorAll('.counter');
+  const totalBalanceCard = document.getElementById("totalBalanceCard");
+  const savingsCard = document.getElementById("savingsCard");
+  const investedCard = document.getElementById("investedCard");
+  const totalBalanceValue = document.getElementById("totalBalanceValue");
+  const savingsValue = document.getElementById("savingsValue");
+  const investedValue = document.getElementById("investedValue");
+  const cardActionPanel = document.getElementById("cardActionPanel");
+  const cardActionTitle = document.getElementById("cardActionTitle");
+  const cardActionHint = document.getElementById("cardActionHint");
+  const cardAmountInput = document.getElementById("cardAmountInput");
+  const cardActionButton = document.getElementById("cardActionButton");
+  const cardActionMessage = document.getElementById("cardActionMessage");
+  let currentAction = "";
+  let panelOpen = false;
+  let totalBalance = 2450;
+  let savings = 1800;
+  let invested = 650;
+
+  counters.forEach(counter => {
+    const target = +counter.dataset.target;
+    let count = 0;
+    const step = target / 60;
+
+    const update = () => {
+      count += step;
+      if (count < target) {
+        counter.innerText = Math.floor(count);
+        requestAnimationFrame(update);
+      } else {
+        counter.innerText = target;
+      }
+    };
+    update();
+  });
+
+  function renderBalances() {
+    totalBalanceValue.textContent = Math.round(totalBalance).toLocaleString();
+    savingsValue.textContent = Math.round(savings).toLocaleString();
+    investedValue.textContent = Math.round(invested).toLocaleString();
+  }
+
+  function setCardActionMessage(text, isError) {
+    cardActionMessage.textContent = text;
+    cardActionMessage.className = isError ? "text-sm mt-3 text-red-600" : "text-sm mt-3 text-green-600";
+  }
+
+  function clearActiveStatCards() {
+    [totalBalanceCard, savingsCard, investedCard].forEach((card) => {
+      if (card) card.classList.remove("active");
+    });
+  }
+
+  function showActionPanel() {
+    cardActionPanel.classList.add("open");
+    panelOpen = true;
+  }
+
+  function hideActionPanel() {
+    cardActionPanel.classList.remove("open");
+    panelOpen = false;
+    currentAction = "";
+    cardAmountInput.value = "";
+    setCardActionMessage("", false);
+  }
+
+  function openActionPanel(type) {
+    currentAction = type;
+    cardAmountInput.value = "";
+    setCardActionMessage("", false);
+    showActionPanel();
+
+    if (type === "cashin") {
+      cardActionTitle.textContent = "Cash In";
+      cardActionHint.textContent = "Add money to your total balance.";
+      cardActionButton.textContent = "Cash In";
+    } else if (type === "cashout") {
+      cardActionTitle.textContent = "Cash Out";
+      cardActionHint.textContent = "Withdraw money from your savings.";
+      cardActionButton.textContent = "Cash Out";
+    }
+  }
+
+  if (totalBalanceCard && savingsCard && investedCard) {
+    totalBalanceCard.addEventListener("click", () => {
+      if (panelOpen && currentAction === "cashin") {
+        clearActiveStatCards();
+        hideActionPanel();
+        return;
+      }
+
+      clearActiveStatCards();
+      totalBalanceCard.classList.add("active");
+      openActionPanel("cashin");
+    });
+
+    savingsCard.addEventListener("click", () => {
+      if (panelOpen && currentAction === "cashout") {
+        clearActiveStatCards();
+        hideActionPanel();
+        return;
+      }
+
+      clearActiveStatCards();
+      savingsCard.classList.add("active");
+      openActionPanel("cashout");
+    });
+
+    investedCard.addEventListener("click", () => {
+      clearActiveStatCards();
+      hideActionPanel();
+      window.location.href = "goals.html";
+    });
+  }
+
+  if (cardActionButton && cardAmountInput) {
+    cardActionButton.addEventListener("click", () => {
+      const amount = Number(cardAmountInput.value);
+      if (!amount || amount <= 0) {
+        setCardActionMessage("Enter an amount greater than 0.", true);
+        return;
+      }
+
+      if (currentAction === "cashin") {
+        totalBalance += amount;
+        renderBalances();
+        setCardActionMessage(`Cash in successful: P${amount.toLocaleString()}`, false);
+        cardAmountInput.value = "";
+        return;
+      }
+
+      if (currentAction === "cashout") {
+        if (amount > savings) {
+          setCardActionMessage(`Insufficient savings. Available: P${Math.round(savings).toLocaleString()}`, true);
+          return;
+        }
+
+        savings -= amount;
+        totalBalance = Math.max(0, totalBalance - amount);
+        renderBalances();
+        setCardActionMessage(`Cash out successful: P${amount.toLocaleString()}`, false);
+        cardAmountInput.value = "";
+      }
+    });
+  }
+
+  const reveals = document.querySelectorAll(".reveal");
+  window.addEventListener("scroll", () => {
+    reveals.forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+        el.classList.add("active");
+      }
+    });
+  });
+
+  // Profile dropdown
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+  const profileMenuContainer = document.getElementById("profileMenuContainer");
+
+  if (profileBtn && profileDropdown && profileMenuContainer) {
+    let isProfileOpen = false;
+    let hideDropdownTimeout;
+
+    function openProfileDropdown() {
+      clearTimeout(hideDropdownTimeout);
+      profileDropdown.classList.remove("hidden");
+      requestAnimationFrame(() => profileDropdown.classList.add("open"));
+      isProfileOpen = true;
+    }
+
+    function closeProfileDropdown() {
+      profileDropdown.classList.remove("open");
+      isProfileOpen = false;
+      clearTimeout(hideDropdownTimeout);
+      hideDropdownTimeout = setTimeout(() => {
+        if (!isProfileOpen) profileDropdown.classList.add("hidden");
+      }, 180);
+    }
+
+    profileBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      profileBtn.classList.remove("profile-btn-pop");
+      requestAnimationFrame(() => profileBtn.classList.add("profile-btn-pop"));
+      if (isProfileOpen) closeProfileDropdown();
+      else openProfileDropdown();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!profileMenuContainer.contains(event.target)) {
+        closeProfileDropdown();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeProfileDropdown();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
+
+

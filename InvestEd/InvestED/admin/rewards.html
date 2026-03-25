@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rewards — InvestEd Admin</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-grid { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+    .left-col { display: flex; flex-direction: column; gap: 16px; }
+    .badge-mgmt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; }
+    .badge-mgmt-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 16px 10px; border-radius: 12px; border: 1.5px solid var(--border); background: #fafbfc; transition: all 0.2s; cursor: pointer; position: relative; }
+    .badge-mgmt-item:hover { border-color: var(--blue); box-shadow: 0 0 0 3px #dbeafe; transform: translateY(-2px); }
+    .badge-circle { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+    .badge-mgmt-name { font-size: 12.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .badge-mgmt-desc { font-size: 10.5px; color: var(--text2); line-height: 1.4; }
+    .badge-pts-label { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; margin-top: 2px; }
+    .badge-trigger-tag { font-size: 10px; color: #64748b; background: #f1f5f9; border-radius: 4px; padding: 2px 6px; }
+    .badge-edit-link { position: absolute; top: 8px; right: 10px; font-size: 10.5px; color: var(--blue); cursor: pointer; font-weight: 600; opacity: 0; transition: opacity 0.15s; }
+    .badge-delete-link { position: absolute; top: 8px; left: 10px; font-size: 10.5px; color: #dc2626; cursor: pointer; font-weight: 600; opacity: 0; transition: opacity 0.15s; }
+    .badge-mgmt-item:hover .badge-edit-link,
+    .badge-mgmt-item:hover .badge-delete-link { opacity: 1; }
+    .badge-add-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 16px 10px; border-radius: 12px; border: 2px dashed #93c5fd; background: #eff6ff; cursor: pointer; transition: all 0.2s; justify-content: center; min-height: 150px; }
+    .badge-add-item:hover { border-color: var(--blue); background: #dbeafe; }
+    .badge-add-circle { width: 60px; height: 60px; border-radius: 50%; background: #F0F4F8; border: 2px dashed #C0CCDA; display: flex; align-items: center; justify-content: center; color: #8A9BB0; font-size: 24px; }
+    .badge-add-item .add-label { font-size: 12px; font-weight: 600; color: var(--blue); }
+    .title-with-icon { display: inline-flex; align-items: center; gap: 8px; }
+    .title-with-icon i { width: 18px; height: 18px; }
+    .point-rule-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .point-rule-item:last-child { border-bottom: none; }
+    .rule-left { display: flex; align-items: center; gap: 10px; }
+    .rule-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+    .rule-icon i { width: 14px; height: 14px; stroke-width: 2.2; }
+    .rule-desc { color: var(--text2); }
+    .rule-pts  { font-weight: 700; color: var(--blue); }
+    .leaderboard-head { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .lb-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .lb-row { display: flex; align-items: center; padding: 11px 20px; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-rank { width: 55px; font-weight: 600; color: var(--text2); font-size: 12px; }
+    .lb-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #27AE60, #2E86C1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .lb-name  { flex: 1; font-weight: 500; }
+    .lb-pts   { font-weight: 700; color: var(--text); }
+    .lb-header-row { display: flex; padding: 8px 20px; font-size: 11.5px; font-weight: 600; color: var(--text3); border-bottom: 1px solid var(--border); background: #FAFBFC; }
+    .lb-header-rank { width: 55px; }
+    .lb-header-name { flex: 1; padding-left: 42px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 28px; width: 460px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .modal h2 i { width: 18px; height: 18px; color: var(--blue); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; }
+    .form-input, .form-select { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s; box-sizing: border-box; }
+    .form-input:focus, .form-select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #dbeafe; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-modal-cancel { padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border); background: #f4f6f9; color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-modal-save { padding: 9px 18px; border-radius: 8px; border: none; background: var(--blue-dark); color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-modal-save:hover { background: #1A4870; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hamburger-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--text); flex-shrink: 0; z-index: 110; }
+    .hamburger-btn i { width: 18px; height: 18px; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 98; opacity: 0; transition: opacity 0.25s; }
+    .sidebar-overlay.open { display: block; opacity: 1; }
+    @media (max-width: 768px) {
+      .hamburger-btn { display: flex; }
+      .sidebar { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 99; transform: translateX(-100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+      .shell { grid-template-columns: 1fr !important; }
+      .main { width: 100%; }
+      .page-grid { grid-template-columns: 1fr; }
+      .badge-mgmt-grid { grid-template-columns: repeat(2, 1fr); padding: 12px; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="main-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><img src="../assets/logo.png" alt="InvestEd logo" /></div>
+      <div class="brand-text">
+        <div class="brand-name">InvestEd Pathways</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="./admin.html"          class="nav-item">Dashboard</a>
+      <a href="students.html"         class="nav-item">Students</a>
+      <a href="investments.html"      class="nav-item">Investments</a>
+      <a href="learning.html"         class="nav-item">Content &amp; Learning</a>
+      <a href="rewards.html"          class="nav-item active">Rewards &amp; Badges</a>
+      <a href="rewards-exchange.html" class="nav-item">Rewards Exchange</a>
+      <a href="settings.html"         class="nav-item">Settings</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+      </button>
+      <span class="topbar-title title-with-icon">
+        <i data-lucide="gift"></i>Rewards
+      </span>
+    </header>
+
+    <div class="content">
+      <div class="page-grid">
+        <div class="left-col">
+
+          <!-- Badge Management -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title title-with-icon">
+                <i data-lucide="award"></i>Badge &amp; Point Management
+              </span>
+              <button class="btn btn-primary btn-sm" onclick="openRewardsAddBadgeModal()">+ Add Badge</button>
+            </div>
+            <div class="badge-mgmt-grid" id="rewards-badge-grid">
+              <div class="badge-add-item" onclick="openRewardsAddBadgeModal()">
+                <div class="badge-add-circle">➕</div>
+                <span class="add-label">Add New Badge</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Point Rules -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title title-with-icon">
+                <i data-lucide="zap"></i>Point Rules
+              </span>
+            </div>
+            <div class="point-rule-item">
+              <div class="rule-left">
+                <div class="rule-icon" style="background:#DCFCE7"><i data-lucide="book-open" style="color:#16A34A"></i></div>
+                <span class="rule-desc">Complete a Lesson</span>
+              </div>
+              <span class="rule-pts">+25 pts</span>
+            </div>
+            <div class="point-rule-item">
+              <div class="rule-left">
+                <div class="rule-icon" style="background:#DCFCE7"><i data-lucide="piggy-bank" style="color:#16A34A"></i></div>
+                <span class="rule-desc">Make First Savings Deposit</span>
+              </div>
+              <span class="rule-pts">+50 pts</span>
+            </div>
+            <div class="point-rule-item">
+              <div class="rule-left">
+                <div class="rule-icon" style="background:#FEF3C7"><i data-lucide="target" style="color:#D97706"></i></div>
+                <span class="rule-desc">Reach Savings Goal</span>
+              </div>
+              <span class="rule-pts">+200 pts</span>
+            </div>
+            <div class="point-rule-item">
+              <div class="rule-left">
+                <div class="rule-icon" style="background:#EDE9FE"><i data-lucide="trending-up" style="color:#7C3AED"></i></div>
+                <span class="rule-desc">Make First Micro-Investment</span>
+              </div>
+              <span class="rule-pts">+75 pts</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="card" style="align-self:start">
+          <div class="leaderboard-head">
+            <span class="card-title title-with-icon">
+              <i data-lucide="bar-chart-2"></i>Student Leaderboard
+            </span>
+          </div>
+          <div class="lb-search">
+            <div class="search-wrap">
+              <input type="text" placeholder="Search" />
+            </div>
+          </div>
+          <div class="lb-header-row">
+            <span class="lb-header-rank">Rank</span>
+            <span class="lb-header-name">Student</span>
+            <span>Pts</span>
+          </div>
+          <div id="leaderboard"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT BADGE MODAL — all fields required by BadgeRepository.kt -->
+<div class="modal-overlay" id="rewards-add-badge-modal">
+  <div class="modal">
+    <h2><i data-lucide="award"></i> <span id="rewards-badge-modal-title">Add New Badge</span></h2>
+    <div class="form-group">
+      <label class="form-label">Badge Name *</label>
+      <input class="form-input" id="rewards-badge-name" placeholder="e.g. Super Saver" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description *</label>
+      <input class="form-input" id="rewards-badge-desc" placeholder="e.g. Make your first saving deposit" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Icon (emoji) *</label>
+      <input class="form-input" id="rewards-badge-icon" placeholder="e.g. 💰" maxlength="4" />
+      <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Pick one emoji — e.g. 🏆 💰 🎯 📚 🔥 💎 ⭐</small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Points *</label>
+      <input class="form-input" id="rewards-badge-points" type="number" min="1" placeholder="e.g. 120" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Auto-Unlock Trigger *</label>
+      <select class="form-input form-select" id="rewards-badge-trigger">
+  <option value="">-- Select when this badge unlocks --</option>
+
+  <!-- Savings -->
+  <option value="first_saving">💰 First Saving — user has any savings entry</option>
+  <option value="savings_500">💰 Savings ₱500 — user reaches ₱500 total savings</option>
+  <option value="savings_1000">💎 Savings ₱1,000 — user reaches ₱1,000 total savings</option>
+
+  <!-- Investment -->
+  <option value="first_invest">📈 First Investment — user has any approved investment</option>
+  <option value="invest_500">🚀 Investment ₱500 — user reaches ₱500 total invested</option>
+  <option value="invest_1000">👑 Investment ₱1,000 — user reaches ₱1,000 total invested</option>
+
+  <!-- Learning -->
+  <option value="lessons_1">📖 First Lesson — user completes 1 lesson</option>
+  <option value="lessons_5">📚 5 Lessons Done — user completes 5 or more lessons</option>
+  <option value="lessons_all">🎓 All Lessons — user completes all lessons (10+)</option>
+
+  <!-- Goals -->
+  <option value="goal_reached">🎯 Goal Reached — user fully completed a savings goal</option>
+</select>
+      <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">The app auto-unlocks this badge when the condition is met.</small>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeRewardsAddBadgeModal()">Cancel</button>
+      <button class="btn-modal-save" id="rewards-badge-save-btn" onclick="saveRewardsBadge()">Add Badge</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE BADGE CONFIRM -->
+<div class="modal-overlay" id="delete-badge-modal">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <h2 style="justify-content:center;margin-bottom:8px;">Delete Badge?</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:24px;">
+      Permanently remove <strong id="delete-badge-name"></strong>? This cannot be undone.
+    </p>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-modal-cancel" onclick="closeDeleteBadgeModal()">Cancel</button>
+      <button class="btn-modal-save" id="delete-badge-confirm-btn" style="background:#dc2626;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="rewards-toast"></div>
+
+<script>
+  lucide.createIcons();
+  function toggleSidebar() {
+    const s=document.getElementById('main-sidebar'),o=document.getElementById('sidebar-overlay'),b=document.getElementById('hamburger-btn');
+    if(s.classList.contains('open')){closeSidebar();}else{s.classList.add('open');o.classList.add('open');b.innerHTML='<i data-lucide="x"></i>';lucide.createIcons();}
+  }
+  function closeSidebar() {
+    const s=document.getElementById('main-sidebar'),o=document.getElementById('sidebar-overlay'),b=document.getElementById('hamburger-btn');
+    s.classList.remove('open');o.classList.remove('open');b.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+</script>
+
+<script type="module">
+import { onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, collection, getDocs, addDoc, updateDoc,
+         deleteDoc, serverTimestamp, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth, db } from "../js/firebase.js";
+
+lucide.createIcons();
+
+const TRIGGER_LABELS = {
+  "first_saving"  : "💰 First Saving",
+  "savings_500"   : "💰 Savings ₱500",
+  "savings_1000"  : "💎 Savings ₱1,000",
+  "first_invest"  : "📈 First Investment",
+  "invest_500"    : "🚀 Investment ₱500",
+  "invest_1000"   : "👑 Investment ₱1,000",
+  "lessons_1"     : "📖 First Lesson",
+  "lessons_5"     : "📚 5 Lessons Done",
+  "lessons_all"   : "🎓 All Lessons",
+  "goal_reached"  : "🎯 Goal Reached"
+};
+
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function initials(n) { return String(n||"U").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
+function showToast(msg) { const t=document.getElementById("rewards-toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2500); }
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "../pages/auth/login.html"; return; }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists() || (snap.data().role||"").toLowerCase() !== "admin") {
+    await signOut(auth); window.location.href = "../pages/auth/login.html"; return;
+  }
+  await loadRewardsBadges();
+  await loadLeaderboard();
+});
+
+// ── LEADERBOARD ──────────────────────────────────────────────────────────────
+
+async function loadLeaderboard() {
+  const container = document.getElementById("leaderboard");
+  const snapshot  = await getDocs(collection(db, "users"));
+  const students  = [];
+  snapshot.forEach(entry => {
+    const d    = entry.data();
+    if ((d.role||"student").toLowerCase() !== "student") return;
+    const pts  = Number(d.rewardPoints ?? d.points ?? 0);
+    const name = d.fullName || [d.firstName,d.lastName].filter(Boolean).join(" ") || d.email || "Unknown";
+    students.push({ name, points: isNaN(pts) ? 0 : pts });
+  });
+  const ranked = students.sort((a,b)=>b.points-a.points).slice(0,10);
+  if (ranked.length === 0) {
+    container.innerHTML = `<div class="lb-row"><span class="lb-name" style="color:var(--text3);text-align:center;width:100%">No leaderboard data yet.</span></div>`;
+    return;
+  }
+  container.innerHTML = "";
+  ranked.forEach((s, i) => {
+    const row = document.createElement("div");
+    row.className = "lb-row";
+    row.innerHTML = `
+      <span class="lb-rank">Rank ${i+1}</span>
+      <div class="lb-avatar">${initials(s.name)}</div>
+      <span class="lb-name">${esc(s.name)}</span>
+      <span class="lb-pts">${s.points.toLocaleString()} pts</span>`;
+    container.appendChild(row);
+  });
+}
+
+// ── BADGES ───────────────────────────────────────────────────────────────────
+
+let rewardsBadgeLookup = new Map();
+let editingBadgeId     = null;
+
+async function loadRewardsBadges() {
+  const grid    = document.getElementById("rewards-badge-grid");
+  const addTile = grid.querySelector(".badge-add-item");
+  grid.querySelectorAll(".badge-mgmt-item").forEach(el => el.remove());
+
+  try {
+    // ✅ orderBy("order") — matches BadgeRepository.kt
+    const snapshot = await getDocs(query(collection(db, "badges"), orderBy("order", "asc")));
+    rewardsBadgeLookup = new Map();
+
+    if (snapshot.empty) {
+      addTile.querySelector(".add-label").textContent = "No badges yet. Add one!";
+      return;
+    }
+
+    snapshot.forEach(entry => {
+      const data    = entry.data();
+      const pts     = Number(data.points ?? 0);
+      if (!data.name) return;
+
+      rewardsBadgeLookup.set(entry.id, { ...data, id: entry.id, points: pts });
+
+      const triggerLabel = TRIGGER_LABELS[data.trigger] || (data.trigger ? `🔗 ${data.trigger}` : "No trigger");
+
+      const card = document.createElement("div");
+      card.className = "badge-mgmt-item";
+      card.dataset.badgeId = entry.id;
+      card.innerHTML = `
+        <span class="badge-edit-link"   onclick="event.stopPropagation();startEditBadge('${entry.id}')">Edit</span>
+        <span class="badge-delete-link" onclick="event.stopPropagation();confirmDeleteBadge('${entry.id}','${esc(data.name)}')">Delete</span>
+        <div class="badge-circle" style="background:#DBEAFE;">${esc(data.icon || "🏆")}</div>
+        <span class="badge-mgmt-name">${esc(data.name)}</span>
+        <span class="badge-mgmt-desc">${esc(data.description || "")}</span>
+        <span class="badge-pts-label" style="background:#DBEAFE;color:#2563EB;">+${pts} pts</span>
+        <span class="badge-trigger-tag">${triggerLabel}</span>
+      `;
+      grid.insertBefore(card, addTile);
+    });
+  } catch(err) {
+    console.error("Failed to load badges:", err.message);
+  }
+}
+
+// ── ADD / EDIT MODAL ─────────────────────────────────────────────────────────
+
+window.openRewardsAddBadgeModal = () => {
+  editingBadgeId = null;
+  ["rewards-badge-name","rewards-badge-desc","rewards-badge-icon","rewards-badge-points"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("rewards-badge-trigger").value = "";
+  document.getElementById("rewards-badge-modal-title").textContent = "Add New Badge";
+  document.getElementById("rewards-badge-save-btn").textContent    = "Add Badge";
+  document.getElementById("rewards-add-badge-modal").classList.add("open");
+  lucide.createIcons();
+};
+
+window.closeRewardsAddBadgeModal = () => document.getElementById("rewards-add-badge-modal").classList.remove("open");
+
+window.startEditBadge = (badgeId) => {
+  const badge = rewardsBadgeLookup.get(badgeId);
+  if (!badge) return;
+  editingBadgeId = badgeId;
+  document.getElementById("rewards-badge-name").value    = badge.name    || "";
+  document.getElementById("rewards-badge-desc").value    = badge.description || "";
+  document.getElementById("rewards-badge-icon").value    = badge.icon    || "";
+  document.getElementById("rewards-badge-points").value  = badge.points  || "";
+  document.getElementById("rewards-badge-trigger").value = badge.trigger || "";
+  document.getElementById("rewards-badge-modal-title").textContent = "Edit Badge";
+  document.getElementById("rewards-badge-save-btn").textContent    = "Save Changes";
+  document.getElementById("rewards-add-badge-modal").classList.add("open");
+};
+
+window.saveRewardsBadge = async () => {
+  const name    = document.getElementById("rewards-badge-name").value.trim();
+  const desc    = document.getElementById("rewards-badge-desc").value.trim();
+  const icon    = document.getElementById("rewards-badge-icon").value.trim();
+  const points  = Number(document.getElementById("rewards-badge-points").value);
+  const trigger = document.getElementById("rewards-badge-trigger").value;
+
+  if (!name)                               { alert("Please enter a badge name.");          return; }
+  if (!desc)                               { alert("Please enter a description.");         return; }
+  if (!icon)                               { alert("Please enter an emoji icon.");         return; }
+  if (!Number.isFinite(points)||points<=0) { alert("Please enter valid points.");          return; }
+  if (!trigger)                            { alert("Please select an auto-unlock trigger."); return; }
+
+  try {
+    if (editingBadgeId) {
+      // ✅ preserve existing order when editing
+      await updateDoc(doc(db, "badges", editingBadgeId), {
+        name, description:desc, icon, points, trigger,
+        updatedAt: serverTimestamp()
+      });
+      showToast("Badge updated.");
+    } else {
+      // ✅ set order = collection size + 1 so orderBy("order") works in app
+      const snap  = await getDocs(collection(db, "badges"));
+      const order = snap.size + 1;
+      await addDoc(collection(db, "badges"), {
+        name, description:desc,
+        icon,       // ✅ emoji — used by BadgeAdapter binding.tvBadgeIcon.text = item.icon
+        points,
+        trigger,    // ✅ used by BadgeRepository.checkAndUnlockBadges()
+        order,      // ✅ used by BadgeRepository orderBy("order")
+        createdAt: serverTimestamp()
+      });
+      showToast(`Badge "${name}" added!`);
+    }
+    editingBadgeId = null;
+    closeRewardsAddBadgeModal();
+    await loadRewardsBadges();
+  } catch(err) {
+    alert("Error saving badge: " + err.message);
+  }
+};
+
+// ── DELETE ───────────────────────────────────────────────────────────────────
+
+let pendingDeleteBadgeId = null;
+window.confirmDeleteBadge = (badgeId, name) => {
+  pendingDeleteBadgeId = badgeId;
+  document.getElementById("delete-badge-name").textContent = `"${name}"`;
+  document.getElementById("delete-badge-modal").classList.add("open");
+  document.getElementById("delete-badge-confirm-btn").onclick = async () => {
+    try {
+      await deleteDoc(doc(db, "badges", pendingDeleteBadgeId));
+      document.getElementById("delete-badge-modal").classList.remove("open");
+      pendingDeleteBadgeId = null;
+      await loadRewardsBadges();
+      showToast("Badge deleted.");
+    } catch(err) { alert("Error: " + err.message); }
+  };
+};
+window.closeDeleteBadgeModal = () => {
+  document.getElementById("delete-badge-modal").classList.remove("open");
+  pendingDeleteBadgeId = null;
+};
+
+// close modals on backdrop click
+["rewards-add-badge-modal","delete-badge-modal"].forEach(id =>
+  document.getElementById(id).addEventListener("click", e => {
+    if (e.target !== e.currentTarget) return;
+    if (id === "delete-badge-modal") closeDeleteBadgeModal();
+    else closeRewardsAddBadgeModal();
+  })
+);
+</script>
+</body>
+</html>

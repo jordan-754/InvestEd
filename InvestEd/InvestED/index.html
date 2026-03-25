@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestEd — Start Investing While You're Still in School</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #2E7D32;
+      --green-mid:  #388E3C;
+      --green-light:#4CAF50;
+      --green-bg:   #F1F8E9;
+      --green-pale: #E8F5E9;
+      --white:      #FFFFFF;
+      --off-white:  #F8FAF5;
+      --text:       #1A2B1A;
+      --text2:      #4A6050;
+      --text3:      #8AA090;
+      --border:     #D8E8D0;
+      --blue:       #1565C0;
+      --amber:      #E65100;
+      --shadow:     0 2px 12px rgba(46,125,50,0.10);
+      --shadow-md:  0 8px 32px rgba(46,125,50,0.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ─────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 60px;
+      height: 64px;
+      display: flex; align-items: center;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+      font-size: 20px; font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .nav-logo {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .nav-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .nav-brand span { color: var(--green); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 4px;
+      margin: 0 auto; list-style: none;
+    }
+    .nav-links a {
+      padding: 7px 14px; border-radius: 7px;
+      text-decoration: none; font-size: 14px;
+      font-weight: 500; color: var(--text2);
+      transition: all 0.15s;
+    }
+    .nav-links a:hover { background: var(--green-pale); color: var(--green); }
+
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn {
+      padding: 9px 20px; border-radius: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none;
+      text-decoration: none; display: inline-flex;
+      align-items: center; gap: 7px;
+      transition: all 0.18s;
+    }
+    .btn-ghost {
+      background: transparent; color: var(--text2);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+
+    .btn-green {
+      background: var(--green); color: white;
+      box-shadow: 0 2px 8px rgba(46,125,50,0.25);
+    }
+    .btn-green:hover { background: var(--green-mid); box-shadow: 0 4px 16px rgba(46,125,50,0.3); transform: translateY(-1px); }
+
+    .btn-green-outline {
+      background: transparent; color: var(--green);
+      border: 2px solid var(--green);
+    }
+    .btn-green-outline:hover { background: var(--green); color: white; }
+
+    .btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 10px; }
+    .btn i { width: 16px; height: 16px; }
+
+    /* ── HERO ─────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(160deg, var(--off-white) 0%, var(--green-pale) 60%, #C8E6C9 100%);
+      padding: 90px 60px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      min-height: 540px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(76,175,80,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(46,125,50,0.08) 0%, transparent 70%);
+      bottom: -80px; left: 200px;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green); color: white;
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.3px; margin-bottom: 20px;
+    }
+    .hero-badge i { width: 13px; height: 13px; }
+
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 52px; line-height: 1.1;
+      font-weight: 400; color: var(--text);
+      margin-bottom: 18px; letter-spacing: -0.5px;
+    }
+    .hero-title .green { color: var(--green); font-style: italic; }
+
+    .hero-sub {
+      font-size: 16px; color: var(--text2);
+      line-height: 1.65; margin-bottom: 36px;
+      max-width: 460px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+
+    .hero-stats { display: flex; gap: 32px; }
+    .hstat-val { font-size: 22px; font-weight: 800; color: var(--green); line-height: 1; }
+    .hstat-label { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+    /* HERO CARD MOCKUP */
+    .hero-visual {
+      display: flex; justify-content: center; align-items: center;
+      position: relative; z-index: 1;
+    }
+
+    .mock-card {
+      background: var(--white);
+      border-radius: 18px;
+      box-shadow: var(--shadow-md);
+      padding: 24px; width: 320px;
+      border: 1px solid var(--border);
+      animation: floatCard 4s ease-in-out infinite;
+    }
+    @keyframes floatCard {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .mock-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .mock-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #66BB6A);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: white;
+    }
+    .mock-welcome { font-size: 13px; font-weight: 600; }
+    .mock-sub { font-size: 11px; color: var(--text3); }
+
+    .mock-balance-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px; margin-bottom: 18px;
+    }
+    .mock-bal {
+      background: var(--off-white); border-radius: 10px;
+      padding: 10px; text-align: center; border: 1px solid var(--border);
+    }
+    .mock-bal-val { font-size: 14px; font-weight: 800; }
+    .mock-bal-label { font-size: 9px; color: var(--text3); margin-top: 2px; }
+    .green-val { color: var(--green); }
+    .blue-val  { color: var(--blue); }
+    .amber-val { color: var(--amber); }
+
+    .mock-modules { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mock-mod {
+      background: var(--off-white); border-radius: 8px;
+      padding: 10px; border: 1px solid var(--border);
+      font-size: 10.5px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; color: var(--text2);
+    }
+    .mock-mod i { width: 14px; height: 14px; color: var(--green); }
+
+    .float-badge {
+      position: absolute; background: white; border-radius: 12px;
+      padding: 10px 14px; box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600;
+      animation: floatBadge 5s ease-in-out infinite; z-index: 2;
+    }
+    .float-badge-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .float-badge.top-left  { top: 10px; left: -20px; animation-delay: 1s; }
+    .float-badge.bottom-right { bottom: 20px; right: -10px; animation-delay: 2.5s; }
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50%       { transform: translateY(-7px) rotate(1deg); }
+    }
+
+    /* ── DOWNLOAD INSTALL NOTE ────────────────────── */
+    .install-note {
+      display: flex; align-items: flex-start; gap: 8px;
+      background: #FFF8E1; border: 1px solid #FFE082;
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 12px; color: #5D4037; line-height: 1.5;
+      max-width: 420px; margin-top: -24px; margin-bottom: 32px;
+    }
+    .install-note strong { color: #E65100; }
+
+    /* ── SECTIONS ─────────────────────────────────── */
+    .section { padding: 80px 60px; }
+    .section-alt { background: var(--off-white); }
+
+    .section-label {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--green); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 38px; font-weight: 400;
+      line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.3px;
+    }
+    .section-sub {
+      font-size: 15px; color: var(--text2);
+      max-width: 520px; line-height: 1.65; margin-bottom: 50px;
+    }
+
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .feat-card {
+      background: var(--white); border-radius: 14px;
+      padding: 24px 20px; border: 1.5px solid var(--border);
+      transition: all 0.2s; cursor: default;
+    }
+    .feat-card:hover { border-color: var(--green); box-shadow: var(--shadow); transform: translateY(-3px); }
+    .feat-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+    }
+    .feat-icon i { width: 22px; height: 22px; stroke-width: 2; }
+    .feat-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+    .feat-desc  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step-card {
+      text-align: center; padding: 32px 24px;
+      border-radius: 16px; background: var(--white);
+      border: 1.5px solid var(--border); position: relative;
+    }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--green); color: white;
+      font-size: 16px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+    .step-icon-wrap {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+    .step-icon-wrap i { width: 28px; height: 28px; color: var(--green); stroke-width: 2; }
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc  { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+    .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 700px; }
+    .pay-card {
+      background: var(--white); border-radius: 14px;
+      padding: 24px; border: 1.5px solid var(--border); transition: all 0.2s;
+    }
+    .pay-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
+    .pay-card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .pay-card-desc  { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 14px; }
+    .pay-link {
+      font-size: 13px; font-weight: 600; color: var(--green);
+      text-decoration: none; display: flex; align-items: center; gap: 5px;
+    }
+    .pay-link i { width: 14px; height: 14px; }
+    .pay-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+    }
+    .pay-icon i { width: 20px; height: 20px; color: var(--green); stroke-width: 2; }
+
+    .cta-section {
+      background: linear-gradient(135deg, var(--green) 0%, #1B5E20 100%);
+      padding: 80px 60px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 42px; color: white; margin-bottom: 14px; position: relative;
+    }
+    .cta-section p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 36px; position: relative; }
+    .cta-actions { display: flex; justify-content: center; gap: 14px; position: relative; }
+    .btn-white { background: white; color: var(--green); font-weight: 700; }
+    .btn-white:hover { background: var(--green-pale); }
+    .btn-white-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); }
+    .btn-white-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+    footer {
+      background: #1A2B1A; color: rgba(255,255,255,0.6);
+      padding: 24px 60px; display: flex;
+      align-items: center; justify-content: space-between; font-size: 13px;
+    }
+    footer .brand { color: white; font-weight: 700; font-size: 15px; }
+    footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+    footer a:hover { color: white; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.6s ease forwards; }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .delay-5 { animation-delay: 0.55s; opacity: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">
+        <img src="assets/logo.png" alt="InvestEd Logo" />
+      </div>
+      <span>InvestEd</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#advice">Advice</a></li>
+      <li><a href="#learn">Learn</a></li>
+      <li><a href="#contact">Contact Us</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="pages/auth/login.html" class="btn btn-ghost">Log In</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-badge fade-up delay-1">
+        <i data-lucide="zap"></i> Built for Students
+      </div>
+      <h1 class="hero-title fade-up delay-2">
+        Start Investing<br>
+        While You're <span class="green">Still in School</span>
+      </h1>
+      <p class="hero-sub fade-up delay-3">
+        Learn investing early. Start with just ₱20. InvestEd helps students build savings habits, set financial goals, and grow their money — one small step at a time.
+      </p>
+      <div class="hero-actions fade-up delay-4">
+        <a class="btn btn-green btn-lg">
+          <i data-lucide="trending-up"></i> Start with ₱20
+        </a>
+
+        <!-- ✅ DOWNLOAD BUTTON — wired to Firebase Storage APK -->
+        <a href="https://github.com/jordan-754/InvestEd/releases/latest/download/InvestEd.apk"
+           download="InvestEd.apk"
+           class="btn btn-green-outline btn-lg">
+          <i data-lucide="smartphone"></i> Download App
+        </a>
+      </div>
+
+      <!-- Install note for Android users -->
+      <div class="install-note fade-up delay-5">
+        <span>📱</span>
+        <span>
+          <strong>Android only.</strong> After downloading, go to
+          <strong>Settings → Apps → Install unknown apps</strong>
+          and allow installs from your browser, then open the APK file.
+        </span>
+      </div>
+
+      <div class="hero-stats fade-up delay-5">
+        <div>
+          <div class="hstat-val">₱20</div>
+          <div class="hstat-label">Minimum to start</div>
+        </div>
+        <div>
+          <div class="hstat-val">1,200+</div>
+          <div class="hstat-label">Students enrolled</div>
+        </div>
+        <div>
+          <div class="hstat-val">4.9★</div>
+          <div class="hstat-label">Student rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKUP VISUAL -->
+    <div class="hero-visual fade-up delay-3">
+      <div class="float-badge top-left">
+        <div class="float-badge-icon" style="background:#DCFCE7">🐷</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A2B1A">First Saver Badge!</div>
+          <div style="font-size:10px;color:#8AA090">+50 pts earned</div>
+        </div>
+      </div>
+
+      <div class="mock-card">
+        <div class="mock-header">
+          <div class="mock-avatar">S</div>
+          <div>
+            <div class="mock-welcome">Welcome back, User! 👋</div>
+            <div class="mock-sub">Here's your financial overview</div>
+          </div>
+        </div>
+        <div class="mock-balance-row">
+          <div class="mock-bal">
+            <div class="mock-bal-val green-val">₱2,450</div>
+            <div class="mock-bal-label">Total Balance</div>
+          </div>
+          <div class="mock-bal">
+            <div class="mock-bal-val blue-val">₱1,800</div>
+            <div class="mock-bal-label">Savings</div>
+          </div>
+          <div class="mock-bal">
+            <div class="mock-bal-val amber-val">₱1,800</div>
+            <div class="mock-bal-label">Invested</div>
+          </div>
+        </div>
+        <div class="mock-modules">
+          <div class="mock-mod"><i data-lucide="target"></i> My Goals</div>
+          <div class="mock-mod"><i data-lucide="wallet"></i> Budget Tracker</div>
+          <div class="mock-mod"><i data-lucide="book-open"></i> Learning Hub</div>
+          <div class="mock-mod"><i data-lucide="plus-circle"></i> Add Funds</div>
+        </div>
+      </div>
+
+      <div class="float-badge bottom-right">
+        <div class="float-badge-icon" style="background:#FEE2E2">🔥</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#1A2B1A">4-Week Streak!</div>
+          <div style="font-size:10px;color:#8AA090">Keep it up 💪</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WHY STUDENTS CHOOSE US ── -->
+  <section class="section section-alt" id="features">
+    <div style="text-align:center;margin-bottom:50px">
+      <div class="section-label">Why students choose us</div>
+      <h2 class="section-title">Designed for student budgets</h2>
+      <p class="section-sub" style="margin:0 auto">Everything you need to build real financial habits while still in school.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#DCFCE7">
+          <i data-lucide="piggy-bank" style="color:#16A34A"></i>
+        </div>
+        <div class="feat-title">Start with ₱20</div>
+        <div class="feat-desc">Micro-investments designed for students. No big money needed to begin your journey.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#DBEAFE">
+          <i data-lucide="book-open" style="color:#1565C0"></i>
+        </div>
+        <div class="feat-title">Learn as You Invest</div>
+        <div class="feat-desc">Short, practical lessons on saving, budgeting, and investing written for students.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#FEF3C7">
+          <i data-lucide="target" style="color:#D97706"></i>
+        </div>
+        <div class="feat-title">Smart Portfolios</div>
+        <div class="feat-desc">Set personal goals like Emergency Fund or Laptop Savings and track your progress.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#FEE2E2">
+          <i data-lucide="flame" style="color:#DC2626"></i>
+        </div>
+        <div class="feat-title">Auto-Save Investing</div>
+        <div class="feat-desc">Build streaks and earn badges as you save consistently every week.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="section" id="learn">
+    <div style="text-align:center;margin-bottom:50px">
+      <div class="section-label">Simple process</div>
+      <h2 class="section-title">How InvestEd works</h2>
+      <p class="section-sub" style="margin:0 auto">Three simple steps to start your financial journey today.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon-wrap"><i data-lucide="user-plus"></i></div>
+        <div class="step-title">Create Your Account</div>
+        <div class="step-desc">Sign up with your school email. Set up your student profile and choose your first savings goal in minutes.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon-wrap"><i data-lucide="wallet"></i></div>
+        <div class="step-title">Deposit ₱20 to Start</div>
+        <div class="step-desc">Add funds through GCash, Maya, or bank transfer. Your money goes into your chosen investment pool immediately.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon-wrap"><i data-lucide="trending-up"></i></div>
+        <div class="step-title">Watch It Grow</div>
+        <div class="step-desc">Track your savings, complete lessons, earn badges, and see your money grow — all from one simple dashboard.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PAY WITH PEACE OF MIND ── -->
+  <section class="section section-alt" id="advice">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center">
+      <div>
+        <div class="section-label">Secure &amp; Easy Payments</div>
+        <h2 class="section-title">Pay with peace of mind</h2>
+        <p class="section-sub" style="margin-bottom:32px">Experience complete security and ease with our multiple payment options for Filipino students.</p>
+        <div class="payment-grid">
+          <div class="pay-card">
+            <div class="pay-icon"><i data-lucide="smartphone"></i></div>
+            <div class="pay-card-title">Online Payment</div>
+            <div class="pay-card-desc">GCash, Maya, and major e-wallets accepted instantly.</div>
+            <a href="#" class="pay-link">Learn about Online Pay <i data-lucide="arrow-right"></i></a>
+          </div>
+          <div class="pay-card">
+            <div class="pay-icon"><i data-lucide="landmark"></i></div>
+            <div class="pay-card-title">Bank Payments</div>
+            <div class="pay-card-desc">Direct bank transfer or InstaPay from any local bank.</div>
+            <a href="#" class="pay-link">Learn about Bank Pay <i data-lucide="arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:white;border-radius:14px;padding:20px 24px;border:1.5px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#DCFCE7;display:flex;align-items:center;justify-content:center">
+            <i data-lucide="shield-check" style="width:20px;height:20px;color:#16A34A;stroke-width:2"></i>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700">BSP-Regulated</div>
+            <div style="font-size:12px;color:var(--text2)">All transactions follow Bangko Sentral ng Pilipinas guidelines</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:20px 24px;border:1.5px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#DBEAFE;display:flex;align-items:center;justify-content:center">
+            <i data-lucide="lock" style="width:20px;height:20px;color:#1565C0;stroke-width:2"></i>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700">256-bit Encryption</div>
+            <div style="font-size:12px;color:var(--text2)">Your data and money are always protected</div>
+          </div>
+        </div>
+        <div style="background:white;border-radius:14px;padding:20px 24px;border:1.5px solid var(--border);display:flex;align-items:center;gap:14px">
+          <div style="width:40px;height:40px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center">
+            <i data-lucide="headphones" style="width:20px;height:20px;color:#D97706;stroke-width:2"></i>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700">Student Support</div>
+            <div style="font-size:12px;color:var(--text2)">AI chatbot + human support available anytime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section" id="contact">
+    <h2>Start Investing Today</h2>
+    <p>No fees. No minimums beyond ₱20. No pressure.</p>
+    <div class="cta-actions">
+
+      <!-- ✅ CTA DOWNLOAD BUTTON — same Firebase Storage URL -->
+      <a href="https://github.com/jordan-754/InvestEd/releases/latest/download/InvestEd.apk"
+         download="InvestEd.apk"
+         class="btn btn-white btn-lg">
+        <i data-lucide="download"></i> Download App
+      </a>
+
+      <a href="pages/auth/login.html" class="btn btn-white-outline btn-lg">
+        Log In
+      </a>
+    </div>
+    <p style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.5)">© 2025 InvestEd. All rights reserved.</p>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <span class="brand">InvestEd</span>
+    <span>© 2025 InvestEd. All rights reserved.</span>
+    <div style="display:flex;gap:20px">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InvestEd - Pending Transactions</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .card { transition: all 0.25s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 16px 26px rgba(0,0,0,0.12); }
+    .btn { position: relative; overflow: hidden; padding: 0.6rem 1.1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.3s ease; border: 1px solid #d1d5db; }
+    .btn:active { transform: scale(0.95); }
+    .btn-outline { background: transparent; color: #111827; }
+    .btn-outline:hover { color: #fff; transform: scale(1.05); }
+    .btn-outline::after { content: ""; position: absolute; inset: 0; background: #16a34a; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 0; }
+    .btn-outline:hover::after { transform: translateX(0); }
+    .btn span { position: relative; z-index: 10; }
+    #pageContent { display: none; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 0.25rem; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    #confirmModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; }
+    #confirmModal.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 1rem; padding: 2rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); animation: popIn 0.22s ease; }
+    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    #toastContainer { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 99999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { padding: 0.85rem 1.2rem; border-radius: 0.6rem; font-size: 0.85rem; font-weight: 500; color: #fff; min-width: 280px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-success { background: #16a34a; }
+    .toast-error { background: #dc2626; }
+    .filter-btn { padding: 0.4rem 1rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #d1d5db; cursor: pointer; transition: all 0.2s; }
+    .filter-btn.active { background: #16a34a; color: white; border-color: #16a34a; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+
+  <div id="authOverlay" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p class="text-gray-500 text-sm">Verifying access…</p>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+
+  <div id="confirmModal">
+    <div class="modal-box">
+      <div class="flex items-center gap-3 mb-5">
+        <div id="modalIconWrap" class="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"></div>
+        <div>
+          <p id="modalTitle" class="font-bold text-lg leading-tight"></p>
+          <p id="modalSubtitle" class="text-sm text-gray-500 mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Transaction Details -->
+      <div class="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 mb-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-gray-500">Student</span><span class="font-semibold text-right" id="mUser"></span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Type</span><span class="font-semibold capitalize" id="mType"></span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Amount</span><span class="font-semibold" id="mAmount"></span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Source</span><span class="font-semibold capitalize" id="mSource"></span></div>
+        <div class="flex justify-between"><span class="text-gray-500">Submitted</span><span class="font-semibold" id="mDate"></span></div>
+      </div>
+
+      <!-- Action Note -->
+      <div id="approveNote" class="hidden bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4 text-sm text-green-800">
+        <p class="font-semibold mb-1">Action Note</p>
+        <p id="approveNoteText"></p>
+      </div>
+
+      <!-- ✅ E-wallet details shown for ALL withdrawals -->
+      <div id="walletDetailsDisplay" class="hidden bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 mb-4 text-sm text-purple-800">
+        <p class="font-semibold mb-2">Send Payment To:</p>
+        <div id="walletDetailsContent" class="space-y-1"></div>
+      </div>
+
+      <!-- Reject Note -->
+      <div id="rejectNote" class="hidden bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 text-sm text-red-800">
+        <p class="font-semibold mb-1">Rejection Notice</p>
+        <p id="rejectNoteText"></p>
+      </div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="modalCancelBtn" class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+        <button id="modalConfirmBtn" class="px-5 py-2 rounded-lg text-sm font-bold text-white transition disabled:opacity-50 disabled:cursor-not-allowed"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pageContent" class="flex flex-col min-h-screen">
+    <header class="bg-white border-b">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <img src="../assets/logo.png" class="w-10 h-10 object-contain" alt="InvestEd logo" />
+          <span class="font-bold text-xl">InvestEd</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="backBtn" type="button" class="btn btn-outline"><span>Dashboard</span></button>
+          <button id="refreshBtn" type="button" class="btn btn-outline"><span>Refresh</span></button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full px-4 py-8 flex-grow">
+      <div class="mb-6 flex items-center gap-4 flex-wrap">
+        <h1 class="text-3xl font-bold">Pending Transactions</h1>
+        <span id="pendingBadge" class="hidden text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-300"></span>
+      </div>
+
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="investment">Investments</button>
+        <button class="filter-btn" data-filter="withdrawal">Withdrawals</button>
+        <button class="filter-btn" data-filter="goal_withdrawal">Goal Withdrawals</button>
+      </div>
+
+      <section class="card bg-white rounded-2xl border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="text-left px-4 py-3">Student</th>
+                <th class="text-left px-4 py-3">Type</th>
+                <th class="text-left px-4 py-3">Source / E-Wallet</th>
+                <th class="text-left px-4 py-3">Amount</th>
+                <th class="text-left px-4 py-3">Status</th>
+                <th class="text-left px-4 py-3">Submitted</th>
+                <th class="text-left px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody">
+              <tr class="border-t">
+                <td class="px-4 py-3"><div class="skeleton h-4 w-36"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-24"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-28"></div></td>
+                <td class="px-4 py-3"><div class="skeleton h-4 w-32"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="pageMessage" class="px-5 py-3 text-sm text-gray-500"></p>
+      </section>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-4 text-center mt-auto">
+      <p>&copy; 2025 InvestEd. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      doc, getDoc, collection, getDocs, query, where,
+      updateDoc, serverTimestamp, addDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { auth, db } from "../js/firebase.js";
+
+    const authOverlay          = document.getElementById("authOverlay");
+    const pageContent          = document.getElementById("pageContent");
+    const pendingTableBody     = document.getElementById("pendingTableBody");
+    const pageMessage          = document.getElementById("pageMessage");
+    const pendingBadge         = document.getElementById("pendingBadge");
+    const backBtn              = document.getElementById("backBtn");
+    const refreshBtn           = document.getElementById("refreshBtn");
+    const confirmModal         = document.getElementById("confirmModal");
+    const modalIconWrap        = document.getElementById("modalIconWrap");
+    const modalTitle           = document.getElementById("modalTitle");
+    const modalSubtitle        = document.getElementById("modalSubtitle");
+    const mUser                = document.getElementById("mUser");
+    const mType                = document.getElementById("mType");
+    const mAmount              = document.getElementById("mAmount");
+    const mSource              = document.getElementById("mSource");
+    const mDate                = document.getElementById("mDate");
+    const approveNote          = document.getElementById("approveNote");
+    const approveNoteText      = document.getElementById("approveNoteText");
+    const rejectNote           = document.getElementById("rejectNote");
+    const rejectNoteText       = document.getElementById("rejectNoteText");
+    const modalCancelBtn       = document.getElementById("modalCancelBtn");
+    const modalConfirmBtn      = document.getElementById("modalConfirmBtn");
+    const walletDetailsDisplay = document.getElementById("walletDetailsDisplay");
+    const walletDetailsContent = document.getElementById("walletDetailsContent");
+
+    let currentFilter   = "all";
+    let allTransactions = [];
+    let pendingAction   = null;
+
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        renderTable();
+      });
+    });
+
+    function formatDate(value) {
+      if (!value) return "—";
+      if (value.toDate) return value.toDate().toLocaleString();
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString();
+    }
+
+    function formatAmount(value) {
+      const n = Number(value);
+      return Number.isNaN(n) ? "—"
+        : `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function showToast(type, message) {
+      const t = document.createElement("div");
+      t.className   = `toast toast-${type}`;
+      t.textContent = message;
+      document.getElementById("toastContainer").appendChild(t);
+      setTimeout(() => t.remove(), 4500);
+    }
+
+    // ── Modal ─────────────────────────────────────────────
+    function closeModal() {
+      confirmModal.classList.remove("show");
+      pendingAction = null;
+      walletDetailsDisplay.classList.add("hidden");
+      walletDetailsContent.innerHTML = "";
+      approveNote.classList.add("hidden");
+      rejectNote.classList.add("hidden");
+    }
+
+    modalCancelBtn.addEventListener("click", closeModal);
+    confirmModal.addEventListener("click", (e) => { if (e.target === confirmModal) closeModal(); });
+
+    function openModal(txn, action) {
+      const type           = String(txn.type || "").toLowerCase();
+      const isWithdrawal   = type === "withdrawal";
+      const isGoalWithdraw = type === "goal_withdrawal";
+
+      pendingAction = {
+        txnId       : txn.id,
+        userId      : txn.userId,
+        amount      : Number(txn.amount),
+        source      : txn.source      || "savings",
+        type        : txn.type,
+        goalId      : txn.goalId      || null,
+        goalTitle   : txn.goalTitle   || "",
+        walletType  : txn.walletType  || "",
+        walletNumber: txn.walletNumber|| "",
+        fullName    : txn.fullName    || "",
+        action
+      };
+
+      mUser.textContent   = txn.email || txn.userName || txn.userId || "—";
+      mType.textContent   = isGoalWithdraw ? "Goal Withdrawal"
+                          : isWithdrawal   ? "Withdrawal"
+                          : "Cash-In Investment";
+      mAmount.textContent = formatAmount(txn.amount);
+      mSource.textContent = isGoalWithdraw ? (txn.walletType || "—") : (txn.source || "N/A");
+      mDate.textContent   = formatDate(txn.createdAt);
+
+      approveNote.classList.add("hidden");
+      rejectNote.classList.add("hidden");
+      walletDetailsDisplay.classList.add("hidden");
+      walletDetailsContent.innerHTML = "";
+
+      if (action === "approve") {
+        modalIconWrap.textContent = "✓";
+        modalIconWrap.className   = "w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-green-100 text-green-700 font-bold";
+        modalTitle.textContent    = isGoalWithdraw ? "Approve Goal Withdrawal"
+                                  : isWithdrawal   ? "Approve Withdrawal"
+                                  : "Approve Cash-In";
+        modalSubtitle.textContent = isGoalWithdraw
+          ? `Send ${formatAmount(txn.amount)} to ${txn.walletType || "e-wallet"}`
+          : isWithdrawal
+            ? "This will deduct the amount from the student's balance."
+            : "This will add the amount to the student's savings balance.";
+
+        approveNoteText.textContent = isGoalWithdraw
+          ? `Send ${formatAmount(txn.amount)} to ${txn.fullName} via ${txn.walletType} (${txn.walletNumber}). Goal "${txn.goalTitle}" will be marked as completed.`
+          : isWithdrawal
+            ? `${formatAmount(txn.amount)} will be deducted from the student's ${txn.source || "savings"} balance.`
+            : `${formatAmount(txn.amount)} will be added to this student's savings balance.`;
+        approveNote.classList.remove("hidden");
+
+        // ✅ Show e-wallet details for withdrawals
+        if (isWithdrawal || isGoalWithdraw) {
+          walletDetailsDisplay.classList.remove("hidden");
+          if (txn.walletType) {
+            walletDetailsContent.innerHTML = `
+              <div class="flex justify-between py-1 border-b border-purple-100">
+                <span class="text-gray-500">E-Wallet</span>
+                <span class="font-semibold">${txn.walletType}</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-purple-100">
+                <span class="text-gray-500">Number</span>
+                <span class="font-semibold">${txn.walletNumber || "—"}</span>
+              </div>
+              <div class="flex justify-between py-1 ${isGoalWithdraw ? "border-b border-purple-100" : ""}">
+                <span class="text-gray-500">Account Name</span>
+                <span class="font-semibold">${txn.fullName || "—"}</span>
+              </div>
+              ${isGoalWithdraw ? `<div class="flex justify-between py-1">
+                <span class="text-gray-500">Goal</span>
+                <span class="font-semibold">${txn.goalTitle || "—"}</span>
+              </div>` : ""}`;
+          } else {
+            walletDetailsContent.innerHTML = `
+              <p class="text-xs text-gray-500">No e-wallet details provided. Contact student directly.</p>`;
+          }
+        }
+
+        modalConfirmBtn.textContent = isGoalWithdraw ? "✓ Approve & Send Payment"
+                                    : isWithdrawal   ? "✓ Approve Withdrawal"
+                                    : "✓ Approve & Add to Balance";
+        modalConfirmBtn.className   = "px-5 py-2 rounded-lg text-sm font-bold text-white bg-green-600 hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed";
+
+      } else {
+        modalIconWrap.textContent = "✕";
+        modalIconWrap.className   = "w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-red-100 text-red-600 font-bold";
+        modalTitle.textContent    = isGoalWithdraw ? "Reject Goal Withdrawal"
+                                  : isWithdrawal   ? "Reject Withdrawal"
+                                  : "Reject Investment";
+        modalSubtitle.textContent = "This transaction will be declined.";
+        rejectNoteText.textContent = isGoalWithdraw
+          ? "This goal withdrawal will be declined. The goal will remain active."
+          : isWithdrawal
+            ? "This withdrawal will be declined. The student's balance remains unchanged."
+            : "This cash-in will be declined. No changes to the student's balance.";
+        rejectNote.classList.remove("hidden");
+        modalConfirmBtn.textContent = "✕ Confirm Rejection";
+        modalConfirmBtn.className   = "px-5 py-2 rounded-lg text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed";
+      }
+
+      confirmModal.classList.add("show");
+    }
+
+    // ── Confirm ───────────────────────────────────────────
+    modalConfirmBtn.addEventListener("click", async () => {
+      if (!pendingAction) return;
+      const { txnId, userId, amount, source, type, goalId, goalTitle,
+              walletType, walletNumber, fullName, action } = pendingAction;
+      const txnType        = String(type || "").toLowerCase();
+      const isWithdrawal   = txnType === "withdrawal";
+      const isGoalWithdraw = txnType === "goal_withdrawal";
+
+      modalConfirmBtn.disabled    = true;
+      modalConfirmBtn.textContent = "Processing…";
+
+      try {
+        const txnRef = doc(db, "transactions", txnId);
+        const date   = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+
+        if (action === "approve") {
+          await updateDoc(txnRef, { status: "approved", approvedAt: serverTimestamp() });
+
+          if (isGoalWithdraw) {
+            // ✅ Mark goal completed
+            if (goalId && userId) {
+              await updateDoc(doc(db, "users", userId, "goals", goalId), {
+                isCompleted     : true,
+                withdrawalStatus: "approved",
+                currentAmount   : 0,
+                archivedAt      : serverTimestamp()
+              });
+            }
+            // ✅ No SPENDING entry — money already deducted when goal was funded
+            await addDoc(collection(db, "notifications"), {
+              userId   : userId,
+              title    : "✅ Goal Withdrawal Approved",
+              message  : `Your withdrawal of ${formatAmount(amount)} has been approved and sent to your ${walletType} e-wallet.`,
+              type     : "goal_withdrawal",
+              isRead   : false,
+              createdAt: serverTimestamp()
+            });
+            showToast("success", `✅ Goal withdrawal approved! ${formatAmount(amount)} processed.`);
+
+          } else if (isWithdrawal) {
+            await addDoc(collection(db, "users", userId, "budget"), {
+              label              : `Withdrawal (${source})`,
+              amount             : amount,
+              type               : "SPENDING",
+              date               : date,
+              sourceTransactionId: txnId
+            });
+            if (source === "investment") {
+              const investSnap = await getDocs(
+                query(collection(db, "transactions"),
+                  where("userId", "==", userId),
+                  where("type",   "==", "investment"),
+                  where("status", "==", "approved")
+                )
+              );
+              let remaining = amount;
+              for (const investDoc of investSnap.docs) {
+                if (remaining <= 0) break;
+                const cv     = investDoc.data().currentValue || 0;
+                const deduct = Math.min(remaining, cv);
+                await updateDoc(investDoc.ref, { currentValue: cv - deduct });
+                remaining -= deduct;
+              }
+            }
+            await addDoc(collection(db, "notifications"), {
+              userId   : userId,
+              title    : "💸 Withdrawal Approved",
+              message  : `Your withdrawal of ${formatAmount(amount)} has been approved${walletType ? ` and sent to ${walletType} (${walletNumber})` : ""}.`,
+              type     : "withdrawal",
+              isRead   : false,
+              createdAt: serverTimestamp()
+            });
+            showToast("success", `✅ Withdrawal approved! ${formatAmount(amount)} processed.`);
+
+          } else {
+            // Cash-in
+            await addDoc(collection(db, "users", userId, "budget"), {
+              label              : "Cash in investment",
+              amount             : amount,
+              type               : "SAVINGS",
+              date               : date,
+              sourceTransactionId: txnId
+            });
+            await addDoc(collection(db, "notifications"), {
+              userId   : userId,
+              title    : "Investment Approved",
+              message  : `Your cash-in of ${formatAmount(amount)} has been approved and added to your balance!`,
+              type     : "INVEST",
+              isRead   : false,
+              createdAt: serverTimestamp()
+            });
+            showToast("success", `Approved! ${formatAmount(amount)} added to student's balance.`);
+          }
+
+        } else {
+          await updateDoc(txnRef, { status: "rejected", rejectedAt: serverTimestamp() });
+          if (isGoalWithdraw && goalId && userId) {
+            await updateDoc(doc(db, "users", userId, "goals", goalId), {
+              withdrawalStatus: "rejected"
+            });
+          }
+          await addDoc(collection(db, "notifications"), {
+            userId   : userId,
+            title    : isGoalWithdraw ? "Goal Withdrawal Rejected"
+                     : isWithdrawal  ? "Withdrawal Rejected"
+                     : "Investment Rejected",
+            message  : isGoalWithdraw
+              ? `Your goal withdrawal of ${formatAmount(amount)} was rejected.`
+              : isWithdrawal
+                ? `Your withdrawal of ${formatAmount(amount)} was rejected.`
+                : `Your cash-in of ${formatAmount(amount)} was rejected.`,
+            type     : txnType,
+            isRead   : false,
+            createdAt: serverTimestamp()
+          });
+          showToast("error", `Transaction rejected. Student has been notified.`);
+        }
+
+        closeModal();
+        loadPendingTransactions();
+
+      } catch (err) {
+        console.error("Action failed:", err);
+        showToast("error", "Something went wrong. Please try again.");
+        modalConfirmBtn.disabled    = false;
+        modalConfirmBtn.textContent = action === "approve" ? "✓ Approve" : "✕ Confirm Rejection";
+      }
+    });
+
+    // ── Render table ──────────────────────────────────────
+    function renderTable() {
+      pendingTableBody.innerHTML = "";
+      pageMessage.textContent    = "";
+
+      const filtered = currentFilter === "all"
+        ? allTransactions
+        : allTransactions.filter(t => String(t.type || "").toLowerCase() === currentFilter);
+
+      if (filtered.length === 0) {
+        pageMessage.textContent = `No pending ${currentFilter === "all" ? "" : currentFilter} transactions found.`;
+        pendingBadge.classList.add("hidden");
+        return;
+      }
+
+      pendingBadge.textContent = `${filtered.length} Pending`;
+      pendingBadge.classList.remove("hidden");
+
+      filtered.forEach((item) => {
+        const type           = String(item.type || "").toLowerCase();
+        const isWithdrawal   = type === "withdrawal";
+        const isGoalWithdraw = type === "goal_withdrawal";
+
+        const typeBadge = isGoalWithdraw
+          ? `<span class="px-2 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-700">Goal Withdrawal</span>`
+          : isWithdrawal
+            ? `<span class="px-2 py-1 rounded-md text-xs font-semibold bg-red-100 text-red-700">Withdrawal</span>`
+            : `<span class="px-2 py-1 rounded-md text-xs font-semibold bg-green-100 text-green-700">Cash-In</span>`;
+
+        const amountColor = (isWithdrawal || isGoalWithdraw) ? "text-red-600" : "text-green-600";
+        const amountSign  = (isWithdrawal || isGoalWithdraw) ? "-" : "+";
+        const sourceText  = isGoalWithdraw ? (item.walletType || "—") : (item.source || "—");
+
+        const row = document.createElement("tr");
+        row.id        = `row-${item.id}`;
+        row.className = "border-t hover:bg-gray-50 transition-colors";
+        row.innerHTML = `
+          <td class="px-4 py-3 font-medium">${item.email || item.userName || item.userId || "—"}</td>
+          <td class="px-4 py-3">${typeBadge}</td>
+          <td class="px-4 py-3 text-gray-600 capitalize">${sourceText}</td>
+          <td class="px-4 py-3 font-semibold ${amountColor}">${amountSign}${formatAmount(item.amount)}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-700">pending</span>
+          </td>
+          <td class="px-4 py-3 text-gray-500">${formatDate(item.createdAt)}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <button class="approve-btn px-3 py-1.5 rounded-lg text-xs font-bold border border-green-500 text-green-700 bg-green-50 hover:bg-green-600 hover:text-white transition-all">✓ Approve</button>
+              <button class="reject-btn px-3 py-1.5 rounded-lg text-xs font-bold border border-red-400 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white transition-all">✕ Reject</button>
+            </div>
+          </td>`;
+        pendingTableBody.appendChild(row);
+
+        // ✅ E-wallet detail row for withdrawals
+        if ((isGoalWithdraw || isWithdrawal) && item.walletType) {
+          const detailRow = document.createElement("tr");
+          detailRow.className = "bg-purple-50";
+          detailRow.innerHTML = `
+            <td colspan="7" class="px-4 pb-3 pt-0">
+              <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:10px 14px;margin-top:-2px;">
+                <div style="font-size:12px;font-weight:700;color:#7C3AED;margin-bottom:4px;">Send Payment To:</div>
+                <div style="font-size:12px;color:#374151;display:flex;gap:16px;flex-wrap:wrap;">
+                  <span><b>E-Wallet:</b> ${item.walletType}</span>
+                  <span><b>Number:</b> ${item.walletNumber || "—"}</span>
+                  <span><b>Account Name:</b> ${item.fullName || "—"}</span>
+                  ${isGoalWithdraw ? `<span><b>Goal:</b> ${item.goalTitle || "—"}</span>` : ""}
+                </div>
+              </div>
+            </td>`;
+          pendingTableBody.appendChild(detailRow);
+        }
+
+        row.querySelector(".approve-btn").addEventListener("click", () => openModal(item, "approve"));
+        row.querySelector(".reject-btn").addEventListener("click",  () => openModal(item, "reject"));
+      });
+    }
+
+    // ── Load ──────────────────────────────────────────────
+    async function loadPendingTransactions() {
+      pendingTableBody.innerHTML = `
+        <tr class="border-t">
+          <td class="px-4 py-3"><div class="skeleton h-4 w-36"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-24"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-20"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-28"></div></td>
+          <td class="px-4 py-3"><div class="skeleton h-4 w-32"></div></td>
+        </tr>`;
+      pageMessage.textContent = "";
+      pendingBadge.classList.add("hidden");
+      try {
+        const snapshot = await getDocs(collection(db, "transactions"));
+        allTransactions = [];
+        snapshot.forEach((entry) => {
+          const data = entry.data();
+          if (String(data.status || "").toLowerCase() === "pending") {
+            allTransactions.push({ id: entry.id, ...data });
+          }
+        });
+        renderTable();
+      } catch (error) {
+        console.error("Error loading:", error);
+        pendingTableBody.innerHTML = "";
+        pageMessage.textContent = "Unable to load pending transactions right now.";
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "../pages/auth/login.html"; return; }
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      if (!userSnap.exists() || (userSnap.data().role || "").toLowerCase() !== "admin") {
+        window.location.href = "../pages/auth/login.html"; return;
+      }
+      authOverlay.style.display = "none";
+      pageContent.style.display = "flex";
+      loadPendingTransactions();
+    });
+
+    backBtn.addEventListener("click",    () => { window.location.href = "../admin/admin.html"; });
+    refreshBtn.addEventListener("click", loadPendingTransactions);
+  </script>
+</body>
+</html>

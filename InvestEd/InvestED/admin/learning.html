@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Content & Learning — InvestEd Admin</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .module-card { border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; color: white; position: relative; overflow: hidden; }
+    .module-card:last-child { margin-bottom: 0; }
+    .mod-navy   { background: #1B3A6B; }
+    .mod-gray   { background: #5D7185; }
+    .mod-green  { background: #1E7F4E; }
+    .mod-teal   { background: #1A7F72; }
+    .mod-purple { background: #5B2D8E; }
+    .mod-red    { background: #8B1A1A; }
+    .module-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .module-card p  { font-size: 12px; opacity: 0.8; margin-bottom: 12px; }
+    .mod-footer  { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    .mod-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mod-btn { padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; border: none; transition: opacity 0.15s; }
+    .mod-btn:hover { opacity: 0.85; }
+    .mod-btn-edit   { background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .mod-btn-stats  { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .mod-btn-delete { background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .mod-btn-reset  { background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .mod-btn-reset:hover { background: rgba(255,255,255,0.25); }
+    .last-reset-label { font-size: 10.5px; opacity: 0.65; margin-top: 4px; display: block; font-style: italic; }
+    .reset-schedule-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .reset-schedule-badge { font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 99px; letter-spacing: 0.3px; background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .reset-schedule-select { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.15); color: white; cursor: pointer; outline: none; font-family: 'Inter', sans-serif; }
+    .reset-schedule-select option { background: #1e293b; color: white; }
+    .mod-completions { font-size: 12px; opacity: 0.75; }
+    .pbar-white  { background: rgba(255,255,255,0.25); margin: 10px 0 6px; }
+    .pfill-white { background: white; }
+    .mod-stat-filter { display: flex; align-items: center; gap: 8px; }
+    .filter-select { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text2); cursor: pointer; outline: none; }
+    .add-module-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border: 2px dashed #C0CCDA; border-radius: 10px; color: var(--text3); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; background: #fafbfc; margin-top: 4px; }
+    .add-module-btn:hover { border-color: var(--blue); color: var(--blue); background: #EBF5FB; }
+    .add-module-btn i { width: 16px; height: 16px; }
+    .modules-loading { padding: 32px; text-align: center; color: var(--text3); font-size: 13px; }
+    .spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--blue); animation: spin 0.7s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .badge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+    .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; border-radius: 10px; background: #F7F9FC; border: 1.5px solid var(--border); cursor: pointer; transition: all 0.15s; text-align: center; }
+    .badge-item:hover { border-color: var(--blue); box-shadow: 0 0 0 3px #dbeafe; transform: translateY(-1px); }
+    .badge-icon-wrap { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .badge-icon-wrap i { width: 24px; height: 24px; stroke-width: 2.2; }
+    .badge-label { font-size: 11.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .badge-pts   { font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+    .badge-add   { background: #EBF5FB; border: 2px dashed var(--blue); justify-content: center; min-height: 110px; }
+    .badge-add:hover { background: #dbeafe; }
+    .badge-add .badge-icon-wrap { background: none; }
+    .badge-add .badge-icon-wrap i { width: 24px; height: 24px; color: var(--blue); }
+    .badge-add .badge-label { color: var(--blue); }
+    .section-right-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 0; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 16px; padding: 28px; width: 460px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .modal h2 i { width: 18px; height: 18px; color: var(--blue); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; }
+    .form-input, .form-textarea { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); outline: none; transition: border-color 0.15s; box-sizing: border-box; }
+    .form-input:focus, .form-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #dbeafe; }
+    .form-textarea { resize: vertical; min-height: 70px; }
+    .color-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .color-opt { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .color-opt:hover, .color-opt.selected { border-color: #333; transform: scale(1.1); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-modal-cancel { padding: 9px 18px; border-radius: 8px; border: 1px solid var(--border); background: #f4f6f9; color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-modal-save { padding: 9px 18px; border-radius: 8px; border: none; background: var(--blue-dark); color: white; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .btn-modal-save:hover { background: #1A4870; }
+    .stats-modal { background: white; border-radius: 16px; padding: 28px; width: 600px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
+    .stats-modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .stats-modal-title { font-size: 17px; font-weight: 700; }
+    .stats-modal-sub   { font-size: 12px; color: var(--text2); margin-top: 3px; }
+    .close-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: #f4f6f9; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .close-btn:hover { background: var(--border); }
+    .close-btn i { width: 16px; height: 16px; }
+    .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-pill { background: #f4f6f9; border-radius: 10px; padding: 14px 16px; border: 1px solid var(--border); }
+    .stat-pill-val   { font-size: 22px; font-weight: 700; line-height: 1; }
+    .stat-pill-label { font-size: 11px; color: var(--text2); margin-top: 4px; }
+    .chart-section { margin-bottom: 20px; }
+    .chart-section-title { font-size: 11px; font-weight: 600; margin-bottom: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .chart-wrap { background: #f4f6f9; border-radius: 10px; padding: 16px; }
+    .student-list-head { font-size: 11px; font-weight: 600; margin-bottom: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+    .student-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .student-row:last-child { border-bottom: none; }
+    .student-av { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #27AE60, #2E86C1); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
+    .student-name { flex: 1; font-weight: 500; }
+    .done    { font-size: 11px; font-weight: 600; background: #E8F8EF; color: #27AE60; padding: 3px 9px; border-radius: 99px; }
+    .pending { font-size: 11px; font-weight: 600; background: #FEF9E7; color: #D97706; padding: 3px 9px; border-radius: 99px; }
+    .edit-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; }
+    .edit-panel-overlay.open { display: block; }
+    .edit-panel { position: fixed; top: 0; right: -500px; width: 460px; max-width: 100vw; height: 100vh; background: white; z-index: 201; box-shadow: -4px 0 32px rgba(0,0,0,0.15); display: flex; flex-direction: column; transition: right 0.3s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+    .edit-panel.open { right: 0; }
+    .edit-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .edit-panel-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .edit-panel-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: #f4f6f9; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .edit-panel-close:hover { background: #e2e8f0; }
+    .edit-panel-close i { width: 16px; height: 16px; }
+    .edit-panel-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .edit-panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; background: white; }
+    .edit-panel-loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--text3); font-size: 13px; gap: 8px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 999; opacity: 0; transform: translateY(8px); transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .reset-modal { background: white; border-radius: 16px; padding: 28px; width: 380px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.15); text-align: center; }
+    .hamburger-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: white; cursor: pointer; color: var(--text); flex-shrink: 0; z-index: 110; }
+    .hamburger-btn i { width: 18px; height: 18px; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 98; opacity: 0; transition: opacity 0.25s; }
+    .sidebar-overlay.open { display: block; opacity: 1; }
+    @media (max-width: 768px) {
+      .hamburger-btn { display: flex; }
+      .sidebar { position: fixed !important; top: 0; left: 0; height: 100vh; z-index: 99; transform: translateX(-100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+      .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+      .shell { grid-template-columns: 1fr !important; }
+      .main  { width: 100%; min-width: 0; }
+      .page-grid { grid-template-columns: 1fr; }
+      .stats-summary { grid-template-columns: 1fr 1fr; }
+      .edit-panel { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="main-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><img src="../assets/logo.png" alt="InvestEd logo" /></div>
+      <div class="brand-text">
+        <div class="brand-name">InvestEd Pathways</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="./admin.html"          class="nav-item">Dashboard</a>
+      <a href="students.html"         class="nav-item">Students</a>
+      <a href="investments.html"      class="nav-item">Investments</a>
+      <a href="learning.html"         class="nav-item active">Content &amp; Learning</a>
+      <a href="rewards.html"          class="nav-item">Rewards &amp; Badges</a>
+      <a href="rewards-exchange.html" class="nav-item">Rewards Exchange</a>
+      <a href="settings.html"         class="nav-item">Settings</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+      </button>
+      <span class="topbar-title">Content &amp; Learning</span>
+      <button class="btn btn-primary btn-sm" onclick="openAddModal()" style="margin-left:auto">
+        + Add Module
+      </button>
+    </header>
+
+    <div class="content">
+      <div class="page-grid">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Learning Modules</span>
+            <div class="mod-stat-filter">
+              <select class="filter-select" onchange="sortModules(this.value)">
+                <option value="order">Default Order</option>
+                <option value="completions">Most Completions</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
+          </div>
+          <div style="padding:16px;" id="modules-container">
+            <div class="modules-loading"><div class="spinner"></div>Loading modules...</div>
+          </div>
+        </div>
+
+      
+
+<!-- ADD MODULE MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h2><i data-lucide="plus-circle"></i> Add New Module</h2>
+    <div class="form-group">
+      <label class="form-label">Module Title *</label>
+      <input class="form-input" id="mod-title" placeholder="e.g. Financial Basics 101" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description *</label>
+      <textarea class="form-textarea" id="mod-desc" placeholder="Briefly describe what students will learn..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Full Content</label>
+      <textarea class="form-textarea" id="mod-content" placeholder="Write the full lesson content here..." style="min-height:120px"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duration</label>
+      <input class="form-input" id="mod-duration" placeholder="e.g. 5 min read" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Points Reward</label>
+      <input class="form-input" id="mod-points" type="number" min="1" placeholder="e.g. 10" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Card Color</label>
+      <div class="color-options" id="color-options">
+        <div class="color-opt selected" data-color="mod-navy"   style="background:#1B3A6B"></div>
+        <div class="color-opt"          data-color="mod-gray"   style="background:#5D7185"></div>
+        <div class="color-opt"          data-color="mod-green"  style="background:#1E7F4E"></div>
+        <div class="color-opt"          data-color="mod-teal"   style="background:#1A7F72"></div>
+        <div class="color-opt"          data-color="mod-purple" style="background:#5B2D8E"></div>
+        <div class="color-opt"          data-color="mod-red"    style="background:#8B1A1A"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-modal-save"   onclick="saveModule()">Save Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS MODAL -->
+<div class="modal-overlay" id="stats-modal">
+  <div class="stats-modal">
+    <div class="stats-modal-head">
+      <div>
+        <div class="stats-modal-title" id="stats-title">Module Stats</div>
+        <div class="stats-modal-sub"   id="stats-desc">—</div>
+      </div>
+      <button class="close-btn" onclick="closeStatsModal()"><i data-lucide="x"></i></button>
+    </div>
+    <div class="stats-summary">
+      <div class="stat-pill"><div class="stat-pill-val" id="stat-total" style="color:var(--blue)">—</div><div class="stat-pill-label">Total Students</div></div>
+      <div class="stat-pill"><div class="stat-pill-val" id="stat-done"  style="color:#27AE60">—</div><div class="stat-pill-label">Completed</div></div>
+      <div class="stat-pill"><div class="stat-pill-val" id="stat-rate"  style="color:#D97706">—</div><div class="stat-pill-label">Completion Rate</div></div>
+    </div>
+    <div class="chart-section">
+      <div class="chart-section-title">Completion Progress</div>
+      <div class="chart-wrap"><canvas id="stats-chart" height="160"></canvas></div>
+    </div>
+    <div>
+      <div class="student-list-head">Student Breakdown</div>
+      <div id="stats-students"><div style="color:var(--text3);font-size:13px;padding:8px 0">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <h2 style="justify-content:center;margin-bottom:8px;">Delete Module?</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:24px;">
+      This will permanently remove <strong id="delete-modal-name"></strong> and all its data. This cannot be undone.
+    </p>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-modal-save" id="delete-confirm-btn" style="background:#dc2626;" onmouseenter="this.style.background='#b91c1c'" onmouseleave="this.style.background='#dc2626'">Delete Module</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="reset-modal">
+    <h2 style="font-size:17px;font-weight:700;margin-bottom:8px;">Reset Task?</h2>
+    <p style="font-size:13px;color:#64748b;margin-bottom:24px;">
+      This will clear all student completions for <strong id="reset-modal-name"></strong>.
+      Students will be able to complete it again and earn points.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn-modal-cancel" onclick="closeResetModal()">Cancel</button>
+      <button class="btn-modal-save" id="reset-confirm-btn" style="background:#e67e22;" onmouseenter="this.style.background='#d35400'" onmouseleave="this.style.background='#e67e22'">Yes, Reset Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BADGE MODAL -->
+<div class="modal-overlay" id="add-badge-modal">
+  <div class="modal">
+    <h2><i data-lucide="award"></i> Add New Badge</h2>
+    <div class="form-group">
+      <label class="form-label">Badge Name *</label>
+      <input class="form-input" id="badge-name" placeholder="e.g. Super Saver" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description *</label>
+      <input class="form-input" id="badge-desc" placeholder="e.g. Make your first saving deposit" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Icon (emoji) *</label>
+      <input class="form-input" id="badge-icon" placeholder="e.g. 💰" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Points *</label>
+      <input class="form-input" id="badge-points" type="number" min="1" placeholder="e.g. 120" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Trigger (auto-unlock condition) *</label>
+      <select class="form-input" id="badge-trigger">
+        <option value="">-- Select Trigger --</option>
+        <option value="first_saving">First Saving — user has any savings</option>
+        <option value="first_invest">First Investment — user has any investment</option>
+        <option value="lessons_5">Lessons 5 — user completed 5+ lessons</option>
+        <option value="goal_reached">Goal Reached — user fully completed a goal</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeAddBadgeModal()">Cancel</button>
+      <button class="btn-modal-save"   onclick="saveBadge()">Add Badge</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT SIDE PANEL -->
+<div class="edit-panel-overlay" id="edit-panel-overlay" onclick="closeEditPanel()"></div>
+<div class="edit-panel" id="edit-panel">
+  <div class="edit-panel-header">
+    <span class="edit-panel-title">Edit Module</span>
+    <button class="edit-panel-close" onclick="closeEditPanel()"><i data-lucide="x"></i></button>
+  </div>
+  <div class="edit-panel-body" id="edit-panel-body">
+    <div class="edit-panel-loading">
+      <div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div>
+      Loading...
+    </div>
+  </div>
+  <div class="edit-panel-footer">
+    <button class="btn-modal-cancel" onclick="closeEditPanel()">Cancel</button>
+    <button class="btn-modal-save"   onclick="saveEditModule()">Save Changes</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  lucide.createIcons();
+  function toggleSidebar() {
+    const s=document.getElementById('main-sidebar'),o=document.getElementById('sidebar-overlay'),b=document.getElementById('hamburger-btn');
+    if(s.classList.contains('open')){closeSidebar();}else{s.classList.add('open');o.classList.add('open');b.innerHTML='<i data-lucide="x"></i>';lucide.createIcons();}
+  }
+  function closeSidebar() {
+    const s=document.getElementById('main-sidebar'),o=document.getElementById('sidebar-overlay'),b=document.getElementById('hamburger-btn');
+    s.classList.remove('open');o.classList.remove('open');b.innerHTML='<i data-lucide="menu"></i>';lucide.createIcons();
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+</script>
+
+<script type="module">
+import { onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, updateDoc, deleteDoc, collection, getDocs,
+         addDoc, serverTimestamp, query, orderBy, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth, db } from "../js/firebase.js";
+
+lucide.createIcons();
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "../pages/auth/login.html"; return; }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists() || snap.data().role?.toLowerCase() !== "admin") {
+    await signOut(auth); window.location.href = "../pages/auth/login.html"; return;
+  }
+  await loadModules();
+  await loadLearningBadges();
+  await autoResetIfMidnight();
+});
+
+const COLORS    = ["mod-navy","mod-gray","mod-green","mod-teal","mod-purple","mod-red"];
+const COLOR_MAP = { "mod-navy":"#1B3A6B","mod-gray":"#5D7185","mod-green":"#1E7F4E","mod-teal":"#1A7F72","mod-purple":"#5B2D8E","mod-red":"#8B1A1A" };
+let chartInst = null, allModules = [], selectedColor = "mod-navy";
+
+const BADGE_STYLE_BY_NAME = {
+  "first saver":  { icon:"piggy-bank",  bgColor:"#DCFCE7", iconColor:"#16A34A" },
+  "goal getter":  { icon:"target",      bgColor:"#FEF3C7", iconColor:"#D97706" },
+  "streak saver": { icon:"flame",       bgColor:"#FEE2E2", iconColor:"#DC2626" },
+  "money scholar":{ icon:"book-open",   bgColor:"#DBEAFE", iconColor:"#2563EB" },
+  "baby investor":{ icon:"trending-up", bgColor:"#EDE9FE", iconColor:"#7C3AED" },
+};
+const DEFAULT_BADGES = [
+  { name:"First Saver",   points:50,  icon:"piggy-bank",  bgColor:"#DCFCE7", iconColor:"#16A34A" },
+  { name:"Goal Getter",   points:200, icon:"target",      bgColor:"#FEF3C7", iconColor:"#D97706" },
+  { name:"Streak Saver",  points:100, icon:"flame",       bgColor:"#FEE2E2", iconColor:"#DC2626" },
+  { name:"Money Scholar", points:75,  icon:"book-open",   bgColor:"#DBEAFE", iconColor:"#2563EB" },
+  { name:"Baby Investor", points:150, icon:"trending-up", bgColor:"#EDE9FE", iconColor:"#7C3AED" },
+];
+
+function getBadgeStyle(data) {
+  const preset = BADGE_STYLE_BY_NAME[String(data?.name||"").toLowerCase()];
+  return { icon:data?.icon||preset?.icon||"award", bgColor:data?.bgColor||preset?.bgColor||"#DBEAFE", iconColor:data?.iconColor||preset?.iconColor||"#2563EB" };
+}
+function formatResetTime(ts) {
+  if (!ts) return "Never reset";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return "Last reset: " + d.toLocaleDateString() + " " + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+async function loadModules() {
+  const container = document.getElementById("modules-container");
+  try {
+    const snap = await getDocs(query(collection(db,"modules"), orderBy("order","asc")));
+    if (snap.empty) { await seedDefaults(); return loadModules(); }
+    const raw = snap.docs.map((d,i) => ({ id:d.id, colorClass:d.data().color||COLORS[i%COLORS.length], ...d.data() }));
+    allModules = await Promise.all(raw.map(async mod => {
+      try { const cb = await getDocs(collection(db,"modules",mod.id,"completedBy")); return {...mod, completions:cb.size}; }
+      catch(_) { return mod; }
+    }));
+    renderModules(allModules);
+  } catch(err) {
+    container.innerHTML = `<div class="modules-loading" style="color:#dc2626">Could not load modules.<br><small>${err.message}</small></div>`;
+  }
+}
+
+function renderModules(list) {
+  const c = document.getElementById("modules-container");
+  c.innerHTML = "";
+  const maxC = Math.max(...list.map(m=>m.completions||0), 1);
+  list.forEach(mod => {
+    const pct      = Math.round(((mod.completions||0)/maxC)*100);
+    const schedule = mod.resetSchedule || "manual";
+    const schedLabel = schedule==="daily" ? "Resets Daily" : schedule==="weekly" ? "Resets Weekly" : "Manual Reset";
+    const card = document.createElement("div");
+    card.className = `module-card ${mod.colorClass}`;
+    card.innerHTML = `
+      <h3>${esc(mod.title)}</h3>
+      <p>${esc(mod.description)}</p>
+      <div class="pbar pbar-white"><div class="pfill pfill-white" style="width:${pct}%"></div></div>
+      <div class="mod-footer">
+        <div class="mod-actions">
+          <button class="mod-btn mod-btn-edit"   onclick="openEditPanel('${mod.id}')">Edit</button>
+          <button class="mod-btn mod-btn-delete" onclick="deleteModule('${mod.id}','${esc(mod.title)}')">Delete</button>
+          <button class="mod-btn mod-btn-stats"  onclick="openStatsModal('${mod.id}','${esc(mod.title)}','${esc(mod.description)}')">View Stats</button>
+          <button class="mod-btn mod-btn-reset"  onclick="openResetModal('${mod.id}','${esc(mod.title)}')">Reset Now</button>
+        </div>
+        <span class="mod-completions">${(mod.completions||0).toLocaleString()} completions</span>
+      </div>
+      <div class="reset-schedule-row">
+        <span style="font-size:11px;opacity:0.75;">Reset Schedule:</span>
+        <select class="reset-schedule-select" onchange="saveResetSchedule('${mod.id}',this.value)">
+          <option value="manual" ${schedule==='manual'?'selected':''}>Manual Only</option>
+          <option value="daily"  ${schedule==='daily' ?'selected':''}>Every Day</option>
+          <option value="weekly" ${schedule==='weekly'?'selected':''}>Every Week</option>
+        </select>
+        <span class="reset-schedule-badge" id="sched-badge-${mod.id}">${schedLabel}</span>
+      </div>
+      <span class="last-reset-label" id="last-reset-${mod.id}">${formatResetTime(mod.lastReset)}</span>`;
+    c.appendChild(card);
+  });
+  const btn = document.createElement("div");
+  btn.className = "add-module-btn";
+  btn.innerHTML = `<i data-lucide="plus"></i> Add New Module`;
+  btn.onclick = () => window.openAddModal();
+  c.appendChild(btn);
+  lucide.createIcons();
+}
+
+window.sortModules = (val) => {
+  const s = [...allModules];
+  if      (val==="completions") s.sort((a,b)=>(b.completions||0)-(a.completions||0));
+  else if (val==="newest")      s.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  else                          s.sort((a,b)=>(a.order||0)-(b.order||0));
+  renderModules(s);
+};
+
+window.saveResetSchedule = async (moduleId, schedule) => {
+  try {
+    await updateDoc(doc(db,"modules",moduleId), { resetSchedule: schedule });
+    const labels = { daily:"Resets Daily", weekly:"Resets Weekly", manual:"Manual Reset" };
+    const badge  = document.getElementById(`sched-badge-${moduleId}`);
+    if (badge) badge.textContent = labels[schedule] || "";
+    showToast(`Schedule set to: ${labels[schedule]}`);
+  } catch(err) { alert("Failed to save schedule: " + err.message); }
+};
+
+let pendingResetId = null;
+window.openResetModal = (moduleId, title) => {
+  pendingResetId = moduleId;
+  document.getElementById("reset-modal-name").textContent = `"${title}"`;
+  document.getElementById("reset-modal").classList.add("open");
+  document.getElementById("reset-confirm-btn").onclick = confirmReset;
+};
+window.closeResetModal = () => { document.getElementById("reset-modal").classList.remove("open"); pendingResetId = null; };
+
+async function confirmReset() {
+  if (!pendingResetId) return;
+  const moduleId = pendingResetId;
+  closeResetModal();
+  try {
+    const cbSnap    = await getDocs(collection(db, "modules", moduleId, "completedBy"));
+    const usersSnap = await getDocs(collection(db, "users"));
+
+    // ✅ Process in chunks of 400 to stay under Firestore 500 op limit
+    const CHUNK = 400;
+    const allOps = [];
+
+    // Collect all delete ops for completedBy
+    cbSnap.docs.forEach(d => allOps.push({ type: "delete", ref: d.ref }));
+
+    // Collect all update ops for users
+    usersSnap.docs.forEach(u => allOps.push({
+      type: "update",
+      ref: doc(db, "users", u.id),
+      data: {
+        [`completedModules.${moduleId}`] : false,
+        [`completedLessons.${moduleId}`] : false
+      }
+    }));
+
+    // Process in chunks
+    for (let i = 0; i < allOps.length; i += CHUNK) {
+      const chunk = allOps.slice(i, i + CHUNK);
+      const batch = writeBatch(db);
+      chunk.forEach(op => {
+        if (op.type === "delete") batch.delete(op.ref);
+        else batch.update(op.ref, op.data);
+      });
+      await batch.commit();
+    }
+
+    // ✅ Reset completions count separately
+    await updateDoc(doc(db, "modules", moduleId), {
+      completions: 0,
+      lastReset: serverTimestamp()
+    });
+
+    showToast("Task reset. Students can complete it again.");
+    const label = document.getElementById(`last-reset-${moduleId}`);
+    if (label) label.textContent = "Last reset: Just now";
+    await loadModules();
+  } catch(err) { alert("Reset failed: " + err.message); }
+}
+
+async function autoResetIfMidnight() {
+  try {
+    const now           = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo       = new Date(todayMidnight.getTime() - 7*24*60*60*1000);
+    const modulesSnap   = await getDocs(collection(db, "modules"));
+    const usersSnap     = await getDocs(collection(db, "users"));
+
+    for (const moduleDoc of modulesSnap.docs) {
+      const data      = moduleDoc.data();
+      const schedule  = data.resetSchedule || "manual";
+      const lastReset = data.lastReset?.toDate?.();
+      if (schedule === "manual") continue;
+
+      let shouldReset = false;
+      if (schedule === "daily"  && (!lastReset || lastReset < todayMidnight)) shouldReset = true;
+      if (schedule === "weekly" && (!lastReset || lastReset < weekAgo))       shouldReset = true;
+      if (!shouldReset) continue;
+
+      const cbSnap = await getDocs(collection(db, "modules", moduleDoc.id, "completedBy"));
+      const batch  = writeBatch(db);
+
+      // ✅ Clear completedBy subcollection
+      cbSnap.docs.forEach(d => batch.delete(d.ref));
+
+      // ✅ Reset completions count and lastReset
+      batch.update(doc(db, "modules", moduleDoc.id), {
+        completions: 0,
+        lastReset: serverTimestamp()
+      });
+
+      // ✅ Clear BOTH completedModules AND completedLessons for every user
+      usersSnap.docs.forEach(u => {
+        batch.update(doc(db, "users", u.id), {
+          [`completedModules.${moduleDoc.id}`] : false,
+          [`completedLessons.${moduleDoc.id}`] : false  // ✅ this is what the app reads
+        });
+      });
+
+      await batch.commit();
+    }
+  } catch(err) { console.warn("Auto-reset error:", err.message); }
+}
+
+window.openStatsModal = async (moduleId, title, desc) => {
+  document.getElementById("stats-modal").classList.add("open");
+  document.getElementById("stats-title").textContent = title;
+  document.getElementById("stats-desc").textContent  = desc;
+  document.getElementById("stats-students").innerHTML = `<div style="color:var(--text3);font-size:13px;padding:8px 0">Loading...</div>`;
+  ["stat-total","stat-done","stat-rate"].forEach(id => document.getElementById(id).textContent = "—");
+
+  try {
+    // ✅ Re-fetch module doc to get latest completions count
+    const moduleDoc = await getDoc(doc(db, "modules", moduleId));
+    const moduleData = moduleDoc.data() || {};
+
+    const usersSnap = await getDocs(collection(db, "users"));
+    const students  = [];
+
+    for (const u of usersSnap.docs) {
+      const d = u.data();
+      if ((d.role||"student").toLowerCase() !== "student") continue;
+      const name = d.fullName || [d.firstName,d.lastName].filter(Boolean).join(" ") || d.name || d.email || "Unknown";
+
+      // ✅ Check completedLessons map (what app writes)
+      let completed = d.completedLessons?.[moduleId] === true;
+
+      // ✅ Also check completedBy subcollection as fallback
+      if (!completed) {
+        try {
+          completed = (await getDoc(doc(db,"modules",moduleId,"completedBy",u.id))).exists();
+        } catch(_){}
+      }
+
+      students.push({ name, completed });
+    }
+
+    const total   = students.length;
+    const done    = students.filter(s => s.completed).length;
+    const pending = total - done;
+    const rate    = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-done").textContent  = done;
+    document.getElementById("stat-rate").textContent  = rate + "%";
+
+    const ctx = document.getElementById("stats-chart").getContext("2d");
+    if (chartInst) chartInst.destroy();
+    chartInst = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Completed", "Not Yet Completed"],
+        datasets: [{
+          data: [done, pending],
+          backgroundColor: ["#27AE60", "#E0E7EF"],
+          borderRadius: 8,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.raw} student${c.raw !== 1 ? "s" : ""}` }}
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { family: "Inter", size: 12 }, color: "#4A6080" }},
+          y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "Inter", size: 11 }, color: "#8AA090" }, grid: { color: "#EEF1F5" }}
+        }
+      }
+    });
+
+    const el = document.getElementById("stats-students");
+    el.innerHTML = students.length === 0
+      ? `<div style="color:var(--text3);font-size:13px;padding:8px 0">No students enrolled yet.</div>`
+      : [...students].sort((a, b) => b.completed - a.completed).map(s => `
+          <div class="student-row">
+            <div class="student-av">${initials(s.name)}</div>
+            <span class="student-name">${esc(s.name)}</span>
+            ${s.completed
+              ? `<span class="done">Completed</span>`
+              : `<span class="pending">Pending</span>`}
+          </div>`).join("");
+
+  } catch(err) {
+    document.getElementById("stats-students").innerHTML =
+      `<div style="color:#dc2626;font-size:13px">${err.message}</div>`;
+  }
+};
+window.closeStatsModal = () => { document.getElementById("stats-modal").classList.remove("open"); if (chartInst) { chartInst.destroy(); chartInst = null; } };
+
+let editingModuleId = null, editSelectedColor = "mod-navy";
+window.openEditPanel = async (moduleId) => {
+  editingModuleId = moduleId;
+  document.getElementById("edit-panel").classList.add("open");
+  document.getElementById("edit-panel-overlay").classList.add("open");
+  const body = document.getElementById("edit-panel-body");
+  body.innerHTML = `<div class="edit-panel-loading"><div class="spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div>Loading module...</div>`;
+  try {
+    const snap = await getDoc(doc(db,"modules",moduleId));
+    if (!snap.exists()) { alert("Module not found."); closeEditPanel(); return; }
+    const m = snap.data();
+    editSelectedColor = m.color || "mod-navy";
+    body.innerHTML = `
+      <div class="form-group"><label class="form-label">Module Title *</label><input class="form-input" id="ep-title" value="${esc(m.title||"")}" /></div>
+      <div class="form-group"><label class="form-label">Description *</label><textarea class="form-textarea" id="ep-desc">${esc(m.description||"")}</textarea></div>
+      <div class="form-group"><label class="form-label">Full Content</label><textarea class="form-textarea" id="ep-content" style="min-height:140px" placeholder="Write the full lesson content here...">${esc(m.content||"")}</textarea></div>
+      <div class="form-group"><label class="form-label">Duration</label><input class="form-input" id="ep-duration" value="${esc(m.duration||"5 min read")}" /></div>
+      <div class="form-group"><label class="form-label">Points Reward</label><input class="form-input" id="ep-points" type="number" min="1" value="${m.points||10}" /></div>
+      <div class="form-group"><label class="form-label">Card Color</label>
+        <div class="color-options" id="ep-colors">
+          ${Object.entries(COLOR_MAP).map(([cls,hex])=>`<div class="color-opt ${cls===editSelectedColor?"selected":""}" data-color="${cls}" style="background:${hex}" onclick="selectEditColor('${cls}')"></div>`).join("")}
+        </div>
+      </div>`;
+    lucide.createIcons();
+  } catch(err) { body.innerHTML = `<div style="color:#dc2626;padding:16px;font-size:13px">${err.message}</div>`; }
+};
+window.selectEditColor = (cls) => {
+  editSelectedColor = cls;
+  document.querySelectorAll("#ep-colors .color-opt").forEach(el => el.classList.toggle("selected", el.dataset.color===cls));
+};
+window.closeEditPanel = () => {
+  document.getElementById("edit-panel").classList.remove("open");
+  document.getElementById("edit-panel-overlay").classList.remove("open");
+  editingModuleId = null;
+};
+
+let pendingDeleteId = null;
+window.deleteModule = (moduleId, title) => {
+  pendingDeleteId = moduleId;
+  document.getElementById("delete-modal-name").textContent = `"${title}"`;
+  document.getElementById("delete-modal").classList.add("open");
+  document.getElementById("delete-confirm-btn").onclick = confirmDelete;
+};
+window.closeDeleteModal = () => { document.getElementById("delete-modal").classList.remove("open"); pendingDeleteId = null; };
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const moduleId = pendingDeleteId; closeDeleteModal();
+  try {
+    const cbSnap = await getDocs(collection(db,"modules",moduleId,"completedBy"));
+    await Promise.all(cbSnap.docs.map(d=>deleteDoc(d.ref)));
+    await deleteDoc(doc(db,"modules",moduleId));
+    showToast("Module deleted."); await loadModules();
+  } catch(err) { alert("Error deleting: " + err.message); }
+}
+
+window.saveEditModule = async () => {
+  const title=document.getElementById("ep-title")?.value.trim(), desc=document.getElementById("ep-desc")?.value.trim();
+  const content=document.getElementById("ep-content")?.value.trim(), duration=document.getElementById("ep-duration")?.value.trim();
+  const points=Number(document.getElementById("ep-points")?.value);
+  if (!title) { alert("Please enter a module title."); return; }
+  if (!desc)  { alert("Please enter a description.");  return; }
+  try {
+    await updateDoc(doc(db,"modules",editingModuleId), { title, description:desc, content:content||"", duration:duration||"5 min read", points:Number.isFinite(points)&&points>0?points:10, color:editSelectedColor });
+    closeEditPanel(); showToast("Module updated!"); await loadModules();
+  } catch(err) { alert("Error saving: " + err.message); }
+};
+
+window.openAddModal = () => {
+  ["mod-title","mod-desc","mod-content","mod-duration","mod-points"].forEach(id=>document.getElementById(id).value="");
+  selectedColor="mod-navy";
+  document.querySelectorAll("#color-options .color-opt").forEach(el=>el.classList.toggle("selected",el.dataset.color==="mod-navy"));
+  document.getElementById("add-modal").classList.add("open"); lucide.createIcons();
+};
+window.closeAddModal = () => document.getElementById("add-modal").classList.remove("open");
+document.querySelectorAll("#color-options .color-opt").forEach(el =>
+  el.addEventListener("click", () => {
+    document.querySelectorAll("#color-options .color-opt").forEach(e=>e.classList.remove("selected"));
+    el.classList.add("selected"); selectedColor = el.dataset.color;
+  })
+);
+window.saveModule = async () => {
+  const title=document.getElementById("mod-title").value.trim(), desc=document.getElementById("mod-desc").value.trim();
+  const content=document.getElementById("mod-content").value.trim(), duration=document.getElementById("mod-duration").value.trim();
+  const points=Number(document.getElementById("mod-points").value);
+  if (!title) { alert("Please enter a module title."); return; }
+  if (!desc)  { alert("Please enter a description.");  return; }
+  try {
+    await addDoc(collection(db,"modules"), { title, description:desc, content:content||"", duration:duration||"5 min read", points:Number.isFinite(points)&&points>0?points:10, color:selectedColor, completions:0, order:allModules.length+1, createdAt:serverTimestamp() });
+    closeAddModal(); showToast("Module added!"); await loadModules();
+  } catch(err) { alert("Error: " + err.message); }
+};
+
+window.openAddBadgeModal = () => {
+  document.getElementById("badge-name").value=""; document.getElementById("badge-points").value="";
+  document.getElementById("add-badge-modal").classList.add("open"); lucide.createIcons();
+};
+window.closeAddBadgeModal = () => document.getElementById("add-badge-modal").classList.remove("open");
+async function loadLearningBadges() {
+  const badgeGrid=document.getElementById("learning-badge-grid"), addTile=badgeGrid.querySelector(".badge-add");
+  badgeGrid.querySelectorAll(".badge-item:not(.badge-add)").forEach(el=>el.remove());
+  let snapshot = await getDocs(collection(db,"badges"));
+  if (snapshot.empty) {
+    for (const b of DEFAULT_BADGES) await addDoc(collection(db,"badges"),{...b,createdAt:serverTimestamp()});
+    snapshot = await getDocs(collection(db,"badges"));
+  }
+  const badges=[];
+  snapshot.forEach(entry => {
+    const data=entry.data(), pts=Number(data.points??0);
+    if (!data.name||!Number.isFinite(pts)||pts<=0) return;
+    badges.push({name:data.name,points:pts,style:getBadgeStyle(data),order:data.createdAt?.seconds||0});
+  });
+  badges.sort((a,b)=>a.order-b.order).forEach(badge => {
+    const item=document.createElement("div"); item.className="badge-item";
+    item.innerHTML=`<div class="badge-icon-wrap" style="background:${badge.style.bgColor}"><i data-lucide="${badge.style.icon}" style="color:${badge.style.iconColor}"></i></div><span class="badge-label">${esc(badge.name)}</span><span class="badge-pts" style="background:${badge.style.bgColor};color:${badge.style.iconColor}">+${badge.points} pts</span>`;
+    badgeGrid.insertBefore(item,addTile);
+  });
+  lucide.createIcons();
+}
+window.saveBadge = async () => {
+  const name    = document.getElementById("badge-name").value.trim();
+  const desc    = document.getElementById("badge-desc").value.trim();
+  const icon    = document.getElementById("badge-icon").value.trim();
+  const points  = Number(document.getElementById("badge-points").value);
+  const trigger = document.getElementById("badge-trigger").value;
+
+  if (!name)    { alert("Please enter a badge name.");        return; }
+  if (!desc)    { alert("Please enter a description.");       return; }
+  if (!icon)    { alert("Please enter an emoji icon.");       return; }
+  if (!Number.isFinite(points) || points <= 0) { alert("Please enter valid points."); return; }
+  if (!trigger) { alert("Please select a trigger condition."); return; }
+
+  try {
+    const snap = await getDocs(collection(db, "badges"));
+    const order = snap.size + 1;
+
+    await addDoc(collection(db, "badges"), {
+      name,
+      description : desc,
+      icon,                    // ✅ emoji string e.g. "💰"
+      points,
+      trigger,                 // ✅ used by BadgeRepository.checkAndUnlockBadges()
+      order,                   // ✅ used for sorting in app
+      createdAt   : serverTimestamp()
+    });
+
+    await loadLearningBadges();
+    closeAddBadgeModal();
+    showToast("Badge added.");
+  } catch(err) {
+    alert("Error: " + err.message);
+  }
+};
+
+async function seedDefaults() {
+  const defaults=[
+    {title:"Financial Basics 101",description:"Learn the fundamentals of personal finance.",color:"mod-navy",completions:0,order:1},
+    {title:"Budgeting for Students",description:"How to budget wisely on a student income.",color:"mod-gray",completions:0,order:2},
+    {title:"Intro to Micro-Investing",description:"Start investing with small amounts.",color:"mod-green",completions:0,order:3},
+    {title:"Goal Setting Workshop",description:"Define and track your personal savings goals.",color:"mod-teal",completions:0,order:4},
+  ];
+  for (const m of defaults) await addDoc(collection(db,"modules"),{...m,createdAt:serverTimestamp()});
+}
+
+function initials(n) { return String(n||"U").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function showToast(msg) { const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000); }
+
+["add-modal","stats-modal","add-badge-modal","delete-modal","reset-modal"].forEach(id =>
+  document.getElementById(id).addEventListener("click", e => {
+    if (e.target!==e.currentTarget) return;
+    if      (id==="add-modal")    closeAddModal();
+    else if (id==="stats-modal")  closeStatsModal();
+    else if (id==="delete-modal") closeDeleteModal();
+    else if (id==="reset-modal")  closeResetModal();
+    else                          closeAddBadgeModal();
+  })
+);
+</script>
+</body>
+</html>

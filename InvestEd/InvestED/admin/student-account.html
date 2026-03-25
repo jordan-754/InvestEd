@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Account — InvestEd Admin</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .details-wrap { max-width: 100%; }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .detail-item {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+    }
+    .detail-label {
+      color: var(--text3); font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px;
+    }
+    .detail-value {
+      color: var(--text); font-weight: 600; font-size: 14px; word-break: break-word;
+    }
+    .detail-value.muted { color: var(--text3); font-weight: 400; }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+    .status-line    { margin-bottom: 12px; color: var(--text3); font-size: 13px; }
+
+    .goal-bar-wrap {
+      background: var(--border); border-radius: 99px;
+      height: 6px; margin-top: 8px; overflow: hidden;
+    }
+    .goal-bar-fill {
+      height: 100%; background: #27AE60;
+      border-radius: 99px; transition: width 0.4s;
+    }
+
+    .goal-history-card {
+      background: #F7F9FC; border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;
+    }
+    .goal-history-card:last-child { margin-bottom: 0; }
+    .goal-history-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 8px; gap: 8px; flex-wrap: wrap;
+    }
+    .goal-history-title { font-weight: 700; font-size: 14px; color: var(--text); }
+    .goal-status-badge {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 99px; white-space: nowrap;
+    }
+    .goal-status-active    { background: #DBEAFE; color: #2563EB; }
+    .goal-status-completed { background: #DCFCE7; color: #16A34A; }
+    .goal-status-failed    { background: #FEE2E2; color: #DC2626; }
+
+    .goal-info-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-top: 10px;
+    }
+    .goal-info-item { font-size: 12px; }
+    .goal-info-label { color: var(--text3); font-weight: 500; margin-bottom: 2px; }
+    .goal-info-value { font-weight: 700; color: var(--text); font-size: 13px; }
+
+    /* ── Deposit history ── */
+    .deposit-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px; padding-top: 12px;
+      border-top: 1px solid var(--border);
+      cursor: pointer; user-select: none;
+    }
+    .deposit-toggle-label {
+      font-size: 12px; font-weight: 600; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .deposit-toggle-arrow {
+      font-size: 11px; color: var(--text3);
+      transition: transform 0.2s;
+    }
+    .deposit-toggle-arrow.open { transform: rotate(180deg); }
+
+    .deposit-list {
+      display: none; margin-top: 10px;
+      flex-direction: column; gap: 6px;
+    }
+    .deposit-list.open { display: flex; }
+
+    .deposit-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px; border-radius: 8px;
+      background: white; border: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .deposit-row-left { display: flex; align-items: center; gap: 8px; }
+    .deposit-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #16A34A; flex-shrink: 0;
+    }
+    .deposit-label { font-weight: 500; color: var(--text2); }
+    .deposit-date  { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .deposit-amount { font-weight: 700; color: #16A34A; }
+    .deposit-empty {
+      font-size: 12px; color: var(--text3);
+      padding: 8px 0; text-align: center;
+    }
+
+    .section-title {
+      font-size: 13px; font-weight: 700; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px;
+    }
+
+    .inv-list { display: flex; flex-direction: column; gap: 8px; }
+    .inv-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: 8px;
+      background: #F7F9FC; border: 1px solid var(--border); font-size: 13px;
+    }
+    .inv-amount { font-weight: 700; color: var(--text); }
+    .inv-date   { font-size: 11px; color: var(--text3); }
+
+    .mini-spinner {
+      display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--border); border-top-color: var(--blue);
+      animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .details-grid        { grid-template-columns: 1fr; }
+      .goal-info-row       { grid-template-columns: 1fr 1fr; }
+      .header-actions .btn { font-size: 11px; padding: 5px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><img src="../assets/logo.png" alt="InvestEd logo" /></div>
+      <div class="brand-text">
+        <div class="brand-name">InvestEd Pathways</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="./admin.html"     class="nav-item">Dashboard</a>
+      <a href="students.html"    class="nav-item active">Students</a>
+      <a href="investments.html" class="nav-item">Investments</a>
+      <a href="learning.html"    class="nav-item">Content &amp; Learning</a>
+      <a href="rewards.html"     class="nav-item">Rewards &amp; Badges</a>
+      <a href="settings.html"    class="nav-item">Settings</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="topbar-title">Student Account</span>
+      <div class="header-actions">
+        <button id="backBtn" class="btn btn-outline btn-sm" type="button">
+          ← Back to Students
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="details-wrap">
+        <div class="status-line" id="statusLine">
+          <span class="mini-spinner"></span> Loading student account…
+        </div>
+
+        <div class="card" id="info-card" style="display:none">
+          <div class="card-head">
+            <span class="card-title" id="studentTitle">Student Details</span>
+          </div>
+          <div style="padding:16px;">
+            <div class="details-grid" id="studentDetailsGrid"></div>
+          </div>
+        </div>
+
+        <div id="goal-section" style="display:none">
+          <div class="section-title">Goal History</div>
+          <div class="card">
+            <div style="padding:16px;" id="goal-content"></div>
+          </div>
+        </div>
+
+        <div id="inv-section" style="display:none">
+          <div class="section-title">Investment History</div>
+          <div class="card">
+            <div style="padding:16px;" id="inv-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth, db } from "../js/firebase.js";
+
+// ── Hamburger ─────────────────────────────────────────────
+const sidebar        = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+const hamburger      = document.getElementById("hamburger");
+hamburger.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  sidebarOverlay.classList.toggle("open");
+});
+sidebarOverlay.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  sidebarOverlay.classList.remove("open");
+});
+
+const params    = new URLSearchParams(window.location.search);
+const studentId = params.get("id");
+
+const statusLine   = document.getElementById("statusLine");
+const studentTitle = document.getElementById("studentTitle");
+const detailsGrid  = document.getElementById("studentDetailsGrid");
+const infoCard     = document.getElementById("info-card");
+const goalSection  = document.getElementById("goal-section");
+const goalContent  = document.getElementById("goal-content");
+const invSection   = document.getElementById("inv-section");
+const invContent   = document.getElementById("inv-content");
+
+document.getElementById("backBtn")
+  .addEventListener("click", () => window.location.href = "students.html");
+
+// ── Helpers ───────────────────────────────────────────────
+function formatDate(value) {
+  if (!value) return "—";
+  if (value?.toDate)             return value.toDate().toLocaleDateString();
+  if (typeof value === "number") return new Date(value).toLocaleDateString();
+  const p = new Date(value);
+  return Number.isNaN(p.getTime()) ? String(value) : p.toLocaleDateString();
+}
+
+function formatMoney(value) {
+  const n = Number(value);
+  if (value === undefined || value === null || value === "") return "—";
+  if (Number.isNaN(n)) return "—";
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function calculateAge(birthdate) {
+  if (!birthdate) return "—";
+  const birth = new Date(birthdate);
+  if (isNaN(birth.getTime())) return "—";
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+function detailItem(label, value, muted = false) {
+  const div = document.createElement("div");
+  div.className = "detail-item";
+  div.innerHTML = `
+    <div class="detail-label">${label}</div>
+    <div class="detail-value ${muted ? "muted" : ""}">${value || "—"}</div>`;
+  return div;
+}
+
+function getGoalStatus(g) {
+  // ✅ Check isCompleted flag set by the app
+  if (g.isCompleted === true) return { label: "Completed", cls: "goal-status-completed" };
+  const pct = g.targetAmount > 0
+    ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0;
+  if (pct >= 100) return { label: "Completed", cls: "goal-status-completed" };
+  if (g.deadline) {
+    const dl = new Date(g.deadline);
+    if (!isNaN(dl) && dl < new Date()) return { label: "Failed", cls: "goal-status-failed" };
+  }
+  return { label: "Active", cls: "goal-status-active" };
+}
+
+// ── Load student ──────────────────────────────────────────
+async function loadStudent() {
+  if (!studentId) { statusLine.textContent = "Missing student ID."; return; }
+  try {
+    const snap = await getDoc(doc(db, "users", studentId));
+    if (!snap.exists()) { statusLine.textContent = "Student not found."; return; }
+
+    const s = snap.data();
+    const fullName = s.fullName
+      || [s.firstName, s.lastName].filter(Boolean).join(" ")
+      || s.name || s.email || "Student";
+
+    studentTitle.textContent = fullName;
+    statusLine.textContent   = "";
+
+    detailsGrid.innerHTML = "";
+    const fields = [
+      { label: "Student ID",    value: studentId, muted: true },
+      { label: "Full Name",     value: fullName },
+      { label: "Email",         value: s.email },
+      { label: "Role",          value: s.role || "student" },
+      { label: "Status",        value: s.status || "active" },
+      { label: "School / Level",value: s.school || s.schoolLevel || s.level },
+      { label: "Reward Points", value: s.rewardPoints ?? s.points ?? 0 },
+      { label: "Last Lesson",   value: s.lastLessonDate || formatDate(s.lastLessonAt) },
+      { label: "Birthdate",     value: s.birthdate ? new Date(s.birthdate).toLocaleDateString("en-PH", { year:"numeric", month:"long", day:"numeric" }) : "—" },
+      { label: "Age",           value: calculateAge(s.birthdate) },
+      { label: "Created At",    value: formatDate(s.createdAt) },
+      { label: "Last Active",   value: formatDate(s.lastActiveAt || s.lastActive || s.updatedAt) },
+    ];
+    fields.forEach(f => detailsGrid.appendChild(detailItem(f.label, f.value, f.muted)));
+    infoCard.style.display = "block";
+
+    await Promise.all([loadGoals(studentId), loadInvestments(studentId)]);
+
+  } catch (err) {
+    console.error("loadStudent error:", err);
+    statusLine.textContent = "Unable to load this student account right now.";
+  }
+}
+
+// ── Load goals + deposits ─────────────────────────────────
+async function loadGoals(studentId) {
+  try {
+    const snap = await getDocs(collection(db, "users", studentId, "goals"));
+    goalSection.style.display = "block";
+
+    if (snap.empty) {
+      goalContent.innerHTML =
+        `<span style="color:var(--text3);font-size:13px">No goals found for this student.</span>`;
+      return;
+    }
+
+    const goals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    goals.sort((a, b) => {
+      const order = { Active: 0, Completed: 1, Failed: 2 };
+      return (order[getGoalStatus(a).label] ?? 3) - (order[getGoalStatus(b).label] ?? 3);
+    });
+
+    const counts = { Active: 0, Completed: 0, Failed: 0 };
+    goals.forEach(g => counts[getGoalStatus(g).label]++);
+
+    goalContent.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="background:#DBEAFE;color:#2563EB;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700">
+          ${counts.Active} Active
+        </div>
+        <div style="background:#DCFCE7;color:#16A34A;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700">
+          ${counts.Completed} Completed
+        </div>
+        <div style="background:#FEE2E2;color:#DC2626;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700">
+          ${counts.Failed} Failed
+        </div>
+      </div>
+      <div id="goals-list"></div>`;
+
+    const list = document.getElementById("goals-list");
+
+    for (const g of goals) {
+      const isCompleted = g.isCompleted === true;
+      const displayAmount = isCompleted ? g.targetAmount : g.currentAmount;
+      const pct      = isCompleted ? 100 : (g.targetAmount > 0
+        ? Math.min(100, Math.round((g.currentAmount / g.targetAmount) * 100)) : 0);
+      const status   = getGoalStatus(g);
+      const barColor = status.label === "Completed" ? "#16A34A"
+                     : status.label === "Failed"    ? "#DC2626" : "#2563EB";
+
+      // ── Fetch deposits sub-collection ──
+      let deposits = [];
+      try {
+        const dSnap = await getDocs(
+          collection(db, "users", studentId, "goals", g.id, "deposits")
+        );
+        deposits = dSnap.docs.map(d => d.data());
+        deposits.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      } catch (_) {}
+
+      const totalDeposited = deposits.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+      const goalId = `goal-${g.id}`;
+
+      const card = document.createElement("div");
+      card.className = "goal-history-card";
+      card.innerHTML = `
+        <div class="goal-history-header">
+          <span class="goal-history-title">${g.title || "Untitled Goal"}</span>
+          <span class="goal-status-badge ${status.cls}">${status.label}</span>
+        </div>
+        <div class="goal-bar-wrap">
+          <div class="goal-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;
+                    color:var(--text3);margin-top:4px">
+          <span>${pct}% complete</span>
+          <span>${formatMoney(displayAmount)} / ${formatMoney(g.targetAmount)}</span>
+        </div>
+        <div class="goal-info-row">
+          <div class="goal-info-item">
+            <div class="goal-info-label">Current Savings</div>
+            <div class="goal-info-value" style="color:#2563EB">${formatMoney(displayAmount)}</div>
+          </div>
+          <div class="goal-info-item">
+            <div class="goal-info-label">Target Amount</div>
+            <div class="goal-info-value">${formatMoney(g.targetAmount)}</div>
+          </div>
+          <div class="goal-info-item">
+            <div class="goal-info-label">Deadline</div>
+            <div class="goal-info-value">${g.deadline || "—"}</div>
+          </div>
+        </div>
+
+        <!-- Deposit History Toggle -->
+        <div class="deposit-toggle" id="toggle-${goalId}">
+          <span class="deposit-toggle-label">
+            Deposit History
+            ${deposits.length > 0
+              ? `<span style="margin-left:6px;background:#DCFCE7;color:#16A34A;
+                             padding:2px 8px;border-radius:99px;font-size:11px">
+                  ${deposits.length} deposit${deposits.length !== 1 ? "s" : ""} · ${formatMoney(totalDeposited)}
+                </span>`
+              : ""}
+          </span>
+          <span class="deposit-toggle-arrow" id="arrow-${goalId}">▼</span>
+        </div>
+
+        <div class="deposit-list" id="deposits-${goalId}">
+          ${deposits.length === 0
+            ? `<div class="deposit-empty">No deposits recorded yet.</div>`
+            : deposits.map(d => `
+                <div class="deposit-row">
+                  <div class="deposit-row-left">
+                    <div class="deposit-dot"></div>
+                    <div>
+                      <div class="deposit-label">Deposit</div>
+                      <div class="deposit-date">${d.date || formatDate(d.timestamp)}</div>
+                    </div>
+                  </div>
+                  <div class="deposit-amount">+${formatMoney(d.amount)}</div>
+                </div>`).join("")}
+        </div>`;
+
+      list.appendChild(card);
+
+      // Toggle deposit list open/close
+      document.getElementById(`toggle-${goalId}`).addEventListener("click", () => {
+        const depList = document.getElementById(`deposits-${goalId}`);
+        const arrow   = document.getElementById(`arrow-${goalId}`);
+        depList.classList.toggle("open");
+        arrow.classList.toggle("open");
+      });
+    }
+
+  } catch (err) {
+    console.warn("loadGoals error:", err.message);
+    goalContent.innerHTML =
+      `<span style="color:#dc2626;font-size:13px">⚠ Could not load goals.</span>`;
+    goalSection.style.display = "block";
+  }
+}
+
+// ── Load investments + withdrawals ────────────────────────
+async function loadInvestments(studentId) {
+  try {
+    const snap = await getDocs(collection(db, "transactions"));
+    invSection.style.display = "block";
+
+    const investments = [];
+    const withdrawals = [];
+
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (data.userId !== studentId) return;
+
+      const type   = String(data.type   || "").toLowerCase();
+      const status = String(data.status || "").toLowerCase();
+
+      if (
+        type === "investment" &&
+        status === "approved" &&
+        !data.description  // ✅ exclude fake mirror transactions
+      ) {
+        investments.push({ id: d.id, ...data });
+      }
+
+      if (type === "withdrawal" || type === "goal_withdrawal") {
+        withdrawals.push({ id: d.id, ...data });
+      }
+    });
+
+    const sortByDate = (a, b) => {
+      const ta = a.createdAt?.toMillis?.() ?? (a.createdAt?.seconds ?? 0) * 1000;
+      const tb = b.createdAt?.toMillis?.() ?? (b.createdAt?.seconds ?? 0) * 1000;
+      return tb - ta;
+    };
+
+    investments.sort(sortByDate);
+    withdrawals.sort(sortByDate);
+
+    const totalInvested   = investments.reduce((s, i) => s + Number(i.amount || 0), 0);
+    const totalWithdrawn  = withdrawals
+      .filter(w => String(w.status || "").toLowerCase() === "approved")
+      .reduce((s, w) => s + Number(w.amount || 0), 0);
+    const netInvestment   = totalInvested - totalWithdrawn;
+
+    invContent.innerHTML = `
+      <!-- Summary Cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+        <div style="padding:12px 16px;background:#F0FDF4;border-radius:8px;border:1px solid #BBF7D0">
+          <div style="font-size:11px;color:#16A34A;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Total Invested</div>
+          <div style="font-size:20px;font-weight:700;color:#16A34A;margin-top:2px">${formatMoney(totalInvested)}</div>
+        </div>
+        <div style="padding:12px 16px;background:#FEF2F2;border-radius:8px;border:1px solid #FECACA">
+          <div style="font-size:11px;color:#DC2626;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Total Withdrawn</div>
+          <div style="font-size:20px;font-weight:700;color:#DC2626;margin-top:2px">${formatMoney(totalWithdrawn)}</div>
+        </div>
+        <div style="padding:12px 16px;background:#EFF6FF;border-radius:8px;border:1px solid #BFDBFE">
+          <div style="font-size:11px;color:#2563EB;font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Net Investment</div>
+          <div style="font-size:20px;font-weight:700;color:#2563EB;margin-top:2px">${formatMoney(netInvestment)}</div>
+        </div>
+      </div>
+
+      <!-- Investment Transactions -->
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;
+                  letter-spacing:0.4px;margin-bottom:8px">Cash In History</div>
+      <div class="inv-list" id="inv-list"></div>
+
+      <!-- Withdrawal Transactions -->
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;
+                  letter-spacing:0.4px;margin:16px 0 8px">Withdrawal History</div>
+      <div class="inv-list" id="withdrawal-list"></div>`;
+
+    // Render investments
+    const invList = document.getElementById("inv-list");
+    if (investments.length === 0) {
+      invList.innerHTML = `<span style="color:var(--text3);font-size:13px">No cash in records yet.</span>`;
+    } else {
+      investments.forEach(inv => {
+        const date = inv.createdAt?.toDate
+          ? inv.createdAt.toDate().toLocaleString()
+          : formatDate(inv.createdAt);
+        const row = document.createElement("div");
+        row.className = "inv-row";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight:600;font-size:13px;color:#16A34A">+${formatMoney(inv.amount)}</div>
+            <div class="inv-date">${date}</div>
+          </div>
+          <div style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;
+                      background:#DCFCE7;color:#16A34A">approved</div>`;
+        invList.appendChild(row);
+      });
+    }
+
+    // Render withdrawals
+    const wdList = document.getElementById("withdrawal-list");
+    if (withdrawals.length === 0) {
+      wdList.innerHTML = `<span style="color:var(--text3);font-size:13px">No withdrawal records yet.</span>`;
+    } else {
+      withdrawals.forEach(wd => {
+        const date = wd.createdAt?.toDate
+          ? wd.createdAt.toDate().toLocaleString()
+          : formatDate(wd.createdAt);
+        const status = String(wd.status || "pending").toLowerCase();
+        const statusColor = status === "approved"
+          ? { bg: "#DCFCE7", text: "#16A34A" }
+          : status === "rejected"
+          ? { bg: "#FEE2E2", text: "#DC2626" }
+          : { bg: "#FEF9C3", text: "#CA8A04" };
+        const row = document.createElement("div");
+        row.className = "inv-row";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight:600;font-size:13px;color:#DC2626">-${formatMoney(wd.amount)}</div>
+            <div class="inv-date">${date} · ${String(wd.type || "").toLowerCase() === "goal_withdrawal" ? "Goal: " + (wd.goalTitle || "—") : "From: " + (wd.source || "—")} ${wd.walletType ? "· " + wd.walletType : ""} ${wd.walletNumber ? wd.walletNumber : ""}</div>
+          </div>
+          <div style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;
+                      background:${statusColor.bg};color:${statusColor.text}">${status}</div>`;
+        wdList.appendChild(row);
+      });
+    }
+
+  } catch (err) {
+    console.warn("loadInvestments error:", err.message);
+    invContent.innerHTML =
+      `<span style="color:#dc2626;font-size:13px">⚠ Could not load investments.</span>`;
+    invSection.style.display = "block";
+  }
+}
+
+
+
+// ── Auth guard ────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "../pages/auth/login.html"; return; }
+  const snap = await getDoc(doc(db, "users", user.uid));
+  if (!snap.exists() || (snap.data().role || "").toLowerCase() !== "admin") {
+    await signOut(auth);
+    window.location.href = "../pages/auth/login.html";
+    return;
+  }
+  loadStudent();
+});
+</script>
+</body>
+</html>

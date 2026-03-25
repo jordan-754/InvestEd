@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvestEd – My Goals</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* CARDS */
+    .card {
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 35px rgba(0,0,0,0.15);
+    }
+
+    /* BUTTON */
+    .btn {
+      padding: 0.6rem 1.4rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      border: 1px solid #d1d5db;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .btn:hover {
+      background: #16a34a;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    /* REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .nav-link {
+      position: relative;
+      font-weight: 500;
+      color: #4b5563;
+      transition: color 0.3s ease;
+    }
+    .nav-link:hover {
+      color: #16a34a;
+    }
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 0%;
+      height: 2px;
+      background: #16a34a;
+      transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    .nav-link.active {
+      color: #16a34a;
+      font-weight: 600;
+    }
+    .nav-link.active::after {
+      width: 100%;
+    }
+    .modal-backdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-backdrop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      transform: translateY(14px) scale(0.96);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .modal-backdrop.show .modal-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .delete-mode .goal-card {
+      cursor: pointer;
+      border: 1px dashed #dc2626;
+    }
+
+    .delete-mode .goal-card:hover {
+      background-color: #fef2f2;
+    }
+
+    .profile-btn-pop {
+      animation: profileBtnPop 0.22s ease;
+    }
+
+    .profile-dropdown {
+      transform-origin: top left;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .profile-dropdown.open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @keyframes profileBtnPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 flex flex-col min-h-screen">
+
+  <!-- NAVBAR -->
+  <header class="fixed top-0 w-full bg-white/80 backdrop-blur border-b z-50">
+  <div id="profileMenuContainer" class="fixed top-3 left-3 z-[60]">
+    <button id="profileBtn" type="button"
+      class="h-10 w-10 rounded-full border border-gray-300 bg-white text-gray-700 hover:border-green-600 hover:text-green-600 transition flex items-center justify-center"
+      aria-label="Open profile menu">
+      <i data-lucide="user-circle-2" class="w-6 h-6"></i>
+    </button>
+
+    <div id="profileDropdown" class="profile-dropdown hidden absolute left-0 mt-3 w-64 bg-white border border-gray-200 rounded-xl shadow-xl p-4">
+      <p class="text-sm text-gray-500">Profile</p>
+      <p class="font-semibold text-gray-900 mt-1">Shean User</p>
+      <p class="text-sm text-gray-600">shean@example.com</p>
+      <div class="h-px bg-gray-200 my-3"></div>
+      <p class="text-sm text-gray-700">Account Type: Student</p>
+      <p class="text-sm text-gray-700">Status: Active</p>
+    </div>
+  </div>
+    <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <img src="../assets/logo.png" class="w-10 h-10" />
+        <span class="font-bold text-xl">InvestEd</span>
+      </div>
+
+      <nav class="hidden md:flex gap-8 font-medium text-gray-600">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="goals.html" class="nav-link active">My Goals</a>
+      <a href="budget.html" class="nav-link">Budget Tracker</a>
+      <a href="learning.html" class="nav-link">Learning Hub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 pt-32 pb-20 reveal">
+    <div class="max-w-7xl mx-auto px-4">
+
+      <!-- HEADER -->
+      <div class="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">My Financial Goals</h1>
+          <p class="text-gray-600">Track and achieve your savings targets</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <button id="addGoalBtn" class="btn w-full md:w-auto">Add Goal</button>
+          <button id="deleteGoalModeBtn" class="btn w-full md:w-auto border-red-300 text-red-600 hover:bg-red-600" type="button">Delete Goal</button>
+        </div>
+      </div>
+      <p id="goalPageMessage" class="text-sm mb-6"></p>
+
+      <!-- GOALS GRID -->
+      <div id="goalsGrid" class="grid md:grid-cols-3 gap-8">
+
+        <!-- GOAL 1 -->
+        <div class="goal-card card bg-white p-8 rounded-2xl shadow" data-target="20000" data-saved="9000">
+          <div class="flex items-center gap-3 mb-4 text-green-600">
+            <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+            <h3 class="text-xl font-semibold">Tuition Fund</h3>
+          </div>
+
+          <p class="text-gray-600 mb-4">Target: P20,000</p>
+
+          <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+            <div class="progress-bar bg-green-600 h-3 rounded-full"></div>
+          </div>
+
+          <p class="text-sm text-gray-500 mb-6">P9,000 saved (45%)</p>
+
+          <div class="mt-4 flex gap-2">
+            <input type="number" min="0" placeholder="P Amount" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+            <button class="btn goal-add-btn" type="button">Add</button>
+          </div>
+          <p class="goal-feedback text-xs text-red-600 mt-2 min-h-[1rem]"></p>
+        </div>
+
+        <!-- GOAL 2 -->
+        <div class="goal-card card bg-white p-8 rounded-2xl shadow" data-target="50000" data-saved="15000">
+          <div class="flex items-center gap-3 mb-4 text-blue-600">
+            <i data-lucide="laptop" class="w-8 h-8"></i>
+            <h3 class="text-xl font-semibold">New Laptop</h3>
+          </div>
+
+          <p class="text-gray-600 mb-4">Target: P50,000</p>
+
+          <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+            <div class="progress-bar bg-blue-600 h-3 rounded-full"></div>
+          </div>
+
+          <p class="text-sm text-gray-500 mb-6">P15,000 saved (30%)</p>
+
+          <div class="mt-4 flex gap-2">
+            <input type="number" min="0" placeholder="P Amount" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <button class="btn goal-add-btn" type="button">Add</button>
+          </div>
+          <p class="goal-feedback text-xs text-red-600 mt-2 min-h-[1rem]"></p>
+        </div>
+
+        <!-- GOAL 3 -->
+        <div class="goal-card card bg-white p-8 rounded-2xl shadow" data-target="30000" data-saved="18000">
+          <div class="flex items-center gap-3 mb-4 text-purple-600">
+            <i data-lucide="plane" class="w-8 h-8"></i>
+            <h3 class="text-xl font-semibold">Travel Fund</h3>
+          </div>
+
+          <p class="text-gray-600 mb-4">Target: P30,000</p>
+
+          <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+            <div class="progress-bar bg-purple-600 h-3 rounded-full"></div>
+          </div>
+
+          <p class="text-sm text-gray-500 mb-6">P18,000 saved (60%)</p>
+
+          <div class="mt-4 flex gap-2">
+            <input type="number" min="0" placeholder="P Amount" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            <button class="btn goal-add-btn" type="button">Add</button>
+          </div>
+          <p class="goal-feedback text-xs text-red-600 mt-2 min-h-[1rem]"></p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <!-- ADD GOAL MODAL -->
+  <div id="goalModal" class="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+    <div class="modal-card bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold">Add New Goal</h3>
+        <button id="closeGoalModalBtn" type="button" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
+
+      <form id="goalForm" class="space-y-4">
+        <div>
+          <label for="goalNameInput" class="block text-sm mb-1">Goal Name</label>
+          <input id="goalNameInput" type="text" placeholder="e.g. Emergency Fund"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <div>
+          <label for="goalTargetInput" class="block text-sm mb-1">Target Amount</label>
+          <input id="goalTargetInput" type="number" min="1" max="150000" placeholder="e.g. 10000"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <p id="goalModalMessage" class="text-sm min-h-[1.25rem]"></p>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button id="cancelGoalBtn" type="button" class="btn">Cancel</button>
+          <button type="submit" class="btn border-green-600 text-green-700 hover:text-white">Add Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div id="deleteConfirmModal" class="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+    <div class="modal-card bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold text-red-600">Delete Goal</h3>
+        <button id="closeDeleteModalBtn" type="button" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
+
+      <p id="deleteModalText" class="text-gray-700 mb-6">Are you sure you want to delete this goal?</p>
+
+      <div class="flex justify-end gap-3">
+        <button id="cancelDeleteBtn" type="button" class="btn">Cancel</button>
+        <button id="confirmDeleteBtn" type="button" class="btn border-red-600 text-red-600 hover:bg-red-600">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-gray-900 text-gray-400 py-10 text-center">
+    <p>© 2025 InvestEd. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function renderIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    }
+
+    renderIcons();
+
+    // REVEAL ON SCROLL
+    const reveals = document.querySelectorAll(".reveal");
+    function revealOnLoadAndScroll() {
+      reveals.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < window.innerHeight - 100) {
+          el.classList.add("active");
+        }
+      });
+    }
+    revealOnLoadAndScroll();
+    window.addEventListener("scroll", revealOnLoadAndScroll);
+    // GOAL LOGIC
+    const goalsGrid = document.getElementById("goalsGrid");
+    const addGoalBtn = document.getElementById("addGoalBtn");
+    const deleteGoalModeBtn = document.getElementById("deleteGoalModeBtn");
+    const goalPageMessage = document.getElementById("goalPageMessage");
+    const goalModal = document.getElementById("goalModal");
+    const goalForm = document.getElementById("goalForm");
+    const goalNameInput = document.getElementById("goalNameInput");
+    const goalTargetInput = document.getElementById("goalTargetInput");
+    const goalModalMessage = document.getElementById("goalModalMessage");
+    const closeGoalModalBtn = document.getElementById("closeGoalModalBtn");
+    const cancelGoalBtn = document.getElementById("cancelGoalBtn");
+    const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+    const deleteModalText = document.getElementById("deleteModalText");
+    const closeDeleteModalBtn = document.getElementById("closeDeleteModalBtn");
+    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    const goalPresets = [
+      { icon: "graduation-cap", tone: "text-green-600", bar: "bg-green-600", ring: "focus:ring-green-500" },
+      { icon: "laptop", tone: "text-blue-600", bar: "bg-blue-600", ring: "focus:ring-blue-500" },
+      { icon: "plane", tone: "text-purple-600", bar: "bg-purple-600", ring: "focus:ring-purple-500" },
+      { icon: "target", tone: "text-orange-600", bar: "bg-orange-600", ring: "focus:ring-orange-500" }
+    ];
+    let isDeleteMode = false;
+    let pendingDeleteCard = null;
+    const GOAL_TARGET_LIMIT = 150000;
+
+    function setGoalPageMessage(message, isError) {
+      goalPageMessage.textContent = message;
+      goalPageMessage.className = isError
+        ? "text-sm mb-6 text-red-600"
+        : "text-sm mb-6 text-green-600";
+    }
+
+    function setGoalModalMessage(message, isError) {
+      goalModalMessage.textContent = message;
+      goalModalMessage.className = isError
+        ? "text-sm min-h-[1.25rem] text-red-600"
+        : "text-sm min-h-[1.25rem] text-green-600";
+    }
+
+    function setDeleteMode(enabled) {
+      isDeleteMode = enabled;
+      goalsGrid.classList.toggle("delete-mode", enabled);
+
+      if (enabled) {
+        deleteGoalModeBtn.classList.add("bg-red-600", "text-white", "border-red-600");
+        setGoalPageMessage("Delete mode enabled. Click a goal card to delete it.", false);
+      } else {
+        deleteGoalModeBtn.classList.remove("bg-red-600", "text-white", "border-red-600");
+      }
+    }
+
+    function openGoalModal() {
+      goalForm.reset();
+      setGoalModalMessage("", true);
+      goalModal.classList.add("show");
+      goalNameInput.focus();
+    }
+
+    function closeGoalModal() {
+      goalModal.classList.remove("show");
+    }
+
+    function openDeleteModal(card) {
+      pendingDeleteCard = card;
+      const goalName = card.querySelector("h3")?.textContent?.trim() || "this goal";
+      deleteModalText.textContent = `Delete "${goalName}"?`;
+      deleteConfirmModal.classList.add("show");
+    }
+
+    function closeDeleteModal() {
+      deleteConfirmModal.classList.remove("show");
+      pendingDeleteCard = null;
+    }
+
+    function setGoalFeedback(card, message, isError) {
+      const feedback = card.querySelector(".goal-feedback");
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.className = isError
+        ? "goal-feedback text-xs text-red-600 mt-2 min-h-[1rem]"
+        : "goal-feedback text-xs text-green-600 mt-2 min-h-[1rem]";
+    }
+
+    function updateProgressBars() {
+      const cards = document.querySelectorAll(".goal-card");
+
+      cards.forEach(card => {
+        const saved = parseFloat(card.dataset.saved || "0");
+        const target = parseFloat(card.dataset.target || "0");
+        const percentage = target > 0 ? Math.min((saved / target) * 100, 100) : 0;
+
+        const bar = card.querySelector(".progress-bar");
+        if (bar) bar.style.width = percentage + "%";
+
+        const text = card.querySelector("p.text-sm");
+        if (text) {
+          text.textContent = `P${saved.toLocaleString()} saved (${Math.round(percentage)}%)`;
+        }
+      });
+    }
+
+    function getGoalPreset(goalName, count) {
+      const name = goalName.toLowerCase();
+
+      if (name.includes("food") || name.includes("meal") || name.includes("grocery") || name.includes("snack")) {
+        return { icon: "utensils-crossed", tone: "text-amber-600", bar: "bg-amber-600", ring: "focus:ring-amber-500" };
+      }
+
+      if (name.includes("gadget") || name.includes("phone") || name.includes("laptop") || name.includes("tablet") || name.includes("tech")) {
+        return { icon: "smartphone", tone: "text-blue-600", bar: "bg-blue-600", ring: "focus:ring-blue-500" };
+      }
+
+      if (name.includes("emergency") || name.includes("health") || name.includes("medical") || name.includes("hospital")) {
+        return { icon: "heart-pulse", tone: "text-red-600", bar: "bg-red-600", ring: "focus:ring-red-500" };
+      }
+
+      if (name.includes("travel") || name.includes("trip") || name.includes("vacation")) {
+        return { icon: "plane", tone: "text-purple-600", bar: "bg-purple-600", ring: "focus:ring-purple-500" };
+      }
+
+      if (name.includes("school") || name.includes("tuition") || name.includes("study") || name.includes("education")) {
+        return { icon: "graduation-cap", tone: "text-green-600", bar: "bg-green-600", ring: "focus:ring-green-500" };
+      }
+
+      return goalPresets[count % goalPresets.length];
+    }
+
+    function createGoalCard(name, target) {
+      const count = document.querySelectorAll(".goal-card").length;
+      const preset = getGoalPreset(name, count);
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "goal-card card bg-white p-8 rounded-2xl shadow";
+      wrapper.dataset.target = String(target);
+      wrapper.dataset.saved = "0";
+
+      wrapper.innerHTML = `
+        <div class="flex items-center gap-3 mb-4 ${preset.tone}">
+          <i data-lucide="${preset.icon}" class="w-8 h-8"></i>
+          <h3 class="text-xl font-semibold">${name}</h3>
+        </div>
+
+        <p class="text-gray-600 mb-4">Target: P${target.toLocaleString()}</p>
+
+        <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+          <div class="progress-bar ${preset.bar} h-3 rounded-full"></div>
+        </div>
+
+        <p class="text-sm text-gray-500 mb-6">P0 saved (0%)</p>
+
+        <div class="mt-4 flex gap-2">
+          <input type="number" min="0" placeholder="P Amount" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${preset.ring}" />
+          <button class="btn goal-add-btn" type="button">Add</button>
+        </div>
+        <p class="goal-feedback text-xs text-red-600 mt-2 min-h-[1rem]"></p>
+      `;
+
+      goalsGrid.appendChild(wrapper);
+      renderIcons();
+      updateProgressBars();
+    }
+
+    goalsGrid.addEventListener("click", (event) => {
+      const clickedCard = event.target.closest(".goal-card");
+      if (isDeleteMode && clickedCard) {
+        if (event.target.matches("input[type='number']")) return;
+        openDeleteModal(clickedCard);
+        return;
+      }
+
+      const addBtn = event.target.closest(".goal-add-btn");
+      if (!addBtn) return;
+
+      const card = addBtn.closest(".goal-card");
+      const input = card.querySelector("input[type='number']");
+      const amount = parseFloat(input.value);
+      const target = parseFloat(card.dataset.target);
+      const saved = parseFloat(card.dataset.saved);
+
+      if (isNaN(amount) || amount <= 0) {
+        setGoalFeedback(card, "Invalid amount. Enter a value greater than 0.", true);
+        return;
+      }
+
+      const remaining = target - saved;
+      if (remaining <= 0) {
+        setGoalFeedback(card, "Invalid action. This goal is already complete.", true);
+        return;
+      }
+
+      if (amount > remaining) {
+        setGoalFeedback(card, `Invalid amount. You can only add up to P${remaining.toLocaleString()} for this goal.`, true);
+        return;
+      }
+
+      card.dataset.saved = String(saved + amount);
+      input.value = "";
+      setGoalFeedback(card, "Amount added successfully.", false);
+      updateProgressBars();
+    });
+
+    goalsGrid.addEventListener("input", (event) => {
+      if (event.target.matches("input[type='number']")) {
+        const card = event.target.closest(".goal-card");
+        if (card) setGoalFeedback(card, "", true);
+      }
+    });
+
+    addGoalBtn.addEventListener("click", openGoalModal);
+    deleteGoalModeBtn.addEventListener("click", () => {
+      setDeleteMode(!isDeleteMode);
+      if (!isDeleteMode) {
+        setGoalPageMessage("Delete mode disabled.", false);
+      }
+    });
+    closeGoalModalBtn.addEventListener("click", closeGoalModal);
+    cancelGoalBtn.addEventListener("click", closeGoalModal);
+    closeDeleteModalBtn.addEventListener("click", closeDeleteModal);
+    cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+    confirmDeleteBtn.addEventListener("click", () => {
+      if (!pendingDeleteCard) return;
+      const goalName = pendingDeleteCard.querySelector("h3")?.textContent?.trim() || "Goal";
+      pendingDeleteCard.remove();
+      setGoalPageMessage(`Goal deleted: ${goalName}`, false);
+      closeDeleteModal();
+    });
+    goalModal.addEventListener("click", (event) => {
+      if (event.target === goalModal) {
+        closeGoalModal();
+      }
+    });
+    deleteConfirmModal.addEventListener("click", (event) => {
+      if (event.target === deleteConfirmModal) {
+        closeDeleteModal();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && deleteConfirmModal.classList.contains("show")) {
+        closeDeleteModal();
+      } else if (event.key === "Escape" && goalModal.classList.contains("show")) {
+        closeGoalModal();
+      }
+    });
+
+    goalForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const goalName = goalNameInput.value.trim();
+      const target = parseFloat(goalTargetInput.value);
+
+      if (!goalName) {
+        setGoalModalMessage("Invalid goal name. Please enter a name.", true);
+        return;
+      }
+
+      if (isNaN(target) || target <= 0) {
+        setGoalModalMessage("Invalid target amount. Please enter a value greater than 0.", true);
+        return;
+      }
+
+      if (target > GOAL_TARGET_LIMIT) {
+        setGoalModalMessage(`Target limit exceeded. Maximum is P${GOAL_TARGET_LIMIT.toLocaleString()}.`, true);
+        return;
+      }
+
+      createGoalCard(goalName, Math.round(target));
+      setGoalPageMessage(`Goal added: ${goalName} (P${Math.round(target).toLocaleString()})`, false);
+      closeGoalModal();
+    });
+
+    // RUN ON PAGE LOAD
+    updateProgressBars();
+  // Profile dropdown
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+  const profileMenuContainer = document.getElementById("profileMenuContainer");
+
+  if (profileBtn && profileDropdown && profileMenuContainer) {
+    let isProfileOpen = false;
+    let hideDropdownTimeout;
+
+    function openProfileDropdown() {
+      clearTimeout(hideDropdownTimeout);
+      profileDropdown.classList.remove("hidden");
+      requestAnimationFrame(() => profileDropdown.classList.add("open"));
+      isProfileOpen = true;
+    }
+
+    function closeProfileDropdown() {
+      profileDropdown.classList.remove("open");
+      isProfileOpen = false;
+      clearTimeout(hideDropdownTimeout);
+      hideDropdownTimeout = setTimeout(() => {
+        if (!isProfileOpen) profileDropdown.classList.add("hidden");
+      }, 180);
+    }
+
+    profileBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      profileBtn.classList.remove("profile-btn-pop");
+      requestAnimationFrame(() => profileBtn.classList.add("profile-btn-pop"));
+      if (isProfileOpen) closeProfileDropdown();
+      else openProfileDropdown();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!profileMenuContainer.contains(event.target)) {
+        closeProfileDropdown();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeProfileDropdown();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+

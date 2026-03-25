@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvestEd – Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .btn {
+      position: relative;
+      overflow: hidden;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn:active { transform: scale(0.95); }
+
+    .btn-primary { background: #16a34a; color: white; }
+    .btn-primary:hover {
+      background: #15803d;
+      transform: scale(1.05);
+      box-shadow: 0 20px 25px rgba(0,0,0,0.2);
+    }
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #34d399, #10b981);
+      opacity: 0;
+      filter: blur(24px);
+      transition: opacity 0.3s ease;
+      z-index: 0;
+    }
+    .btn-primary:hover::after { opacity: 1; }
+
+    .btn-outline {
+      border: 1px solid #d1d5db;
+      background: transparent;
+      color: #111827;
+    }
+    .btn-outline:hover { color: white; transform: scale(1.05); }
+    .btn-outline::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #16a34a;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 0;
+    }
+    .btn-outline:hover::after { transform: translateX(0); }
+    .btn span { position: relative; z-index: 10; }
+
+    .card { transition: box-shadow 0.3s ease; }
+    .card:hover { box-shadow: 0 25px 35px rgba(0,0,0,0.15); }
+
+    .input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .input:hover { border-color: #16a34a; background-color: #f0fdf4; }
+    .input:focus {
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22,163,74,0.25);
+    }
+
+    .btn-loading .btn-spinner { display: inline-block !important; }
+    .btn-loading .btn-label   { display: none; }
+    .btn-spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4">
+
+<div class="card bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
+
+  <!-- LOGO -->
+  <div class="flex justify-center mb-6">
+    <img src="../../assets/logo.png" alt="InvestEd Logo" class="w-30 h-28 object-contain" />
+  </div>
+
+  <h1 class="text-3xl font-bold text-center mb-2">Welcome Back</h1>
+  
+  <!-- LOGIN FORM -->
+  <form id="loginForm" class="space-y-5">
+    <div>
+      <label class="block text-sm mb-1">Email</label>
+      <input id="loginEmail" type="email" class="input" placeholder="you@example.com" autocomplete="email" required />
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Password</label>
+      <input id="loginPassword" type="password" class="input" placeholder="••••••••" autocomplete="current-password" required />
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-sm">
+      <label class="flex items-center gap-2">
+        <input id="rememberMe" type="checkbox" class="accent-green-600">
+        Remember me
+      </label>
+      <a href="setpassword.html" class="text-green-600 hover:underline">Forgot password?</a>
+    </div>
+
+    <!-- Status message -->
+    <p id="loginMessage" class="hidden text-sm rounded-md px-3 py-2"></p>
+
+    <button type="submit" id="loginBtn" class="btn btn-primary w-full flex items-center justify-center gap-2">
+      <span class="btn-spinner"></span>
+      <span class="btn-label">Log In</span>
+    </button>
+  </form>
+
+</div>
+
+<script type="module">
+  import {
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db } from "../../js/firebase.js";
+
+  // ── DOM ───────────────────────────────────────────────────────────
+  lucide.createIcons();
+
+  const loginForm     = document.getElementById("loginForm");
+  const loginEmail    = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
+  const loginMessage  = document.getElementById("loginMessage");
+  const loginBtn      = document.getElementById("loginBtn");
+  const googleBtn     = document.getElementById("googleBtn");
+  const rememberMe    = document.getElementById("rememberMe");
+
+  const lastEmail = localStorage.getItem("investedLastSignupEmail");
+  if (lastEmail) loginEmail.value = lastEmail;
+
+  // ── Helpers ───────────────────────────────────────────────────────
+  function showMsg(text, isError) {
+    loginMessage.textContent = text;
+    loginMessage.classList.remove(
+      "hidden", "bg-red-50", "text-red-700", "bg-green-50", "text-green-700"
+    );
+    loginMessage.classList.add(isError ? "bg-red-50"    : "bg-green-50");
+    loginMessage.classList.add(isError ? "text-red-700" : "text-green-700");
+  }
+
+  function setLoading(btn, loading) {
+    btn.classList.toggle("btn-loading", loading);
+    btn.disabled = loading;
+  }
+
+  function friendlyError(code) {
+    switch (code) {
+      case "auth/user-not-found":
+      case "auth/wrong-password":
+      case "auth/invalid-credential":   return "Invalid email or password.";
+      case "auth/invalid-email":        return "Please enter a valid email address.";
+      case "auth/too-many-requests":    return "Too many attempts. Please try again later.";
+      case "auth/user-disabled":        return "This account has been disabled.";
+      case "auth/popup-closed-by-user": return "Google sign-in was cancelled.";
+      default:                          return "Something went wrong. Please try again.";
+    }
+  }
+
+  // ── Role lookup → redirect ────────────────────────────────────────
+  // Reads users/{uid} from Firestore.
+  // role === "admin"   → admin/admin.html
+  // role === "student" (or any other) → dashboard.html
+  // doc missing        → sign out and show error
+  async function resolveRoleAndRedirect(user, btn) {
+    const userRef = doc(db, "users", user.uid);
+    let userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      const [firstName = "", ...lastParts] = (user.displayName || "").trim().split(" ");
+      const lastName = lastParts.join(" ");
+
+      await setDoc(userRef, {
+        firstName,
+        lastName,
+        email: user.email || "",
+        role: "student",
+        createdAt: serverTimestamp()
+      });
+
+      userSnap = await getDoc(userRef);
+    }
+
+    await updateDoc(userRef, {
+      lastActiveAt: serverTimestamp(),
+      status: "Active"
+    });
+
+    const role = (userSnap.data().role || "student").toLowerCase();
+
+    showMsg("Login successful. Redirecting…", false);
+
+    setTimeout(() => {
+      if (role === "admin") {
+        window.location.href = "../../admin/admin.html";
+      } else {
+        window.location.href = "../dashboard.html";
+      }
+    }, 600);
+  }
+
+  // ── Email / Password ──────────────────────────────────────────────
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setLoading(loginBtn, true);
+
+    try {
+      await setPersistence(
+        auth,
+        rememberMe.checked ? browserLocalPersistence : browserSessionPersistence
+      );
+      await signInWithEmailAndPassword(
+        auth,
+        loginEmail.value.trim(),
+        loginPassword.value
+      );
+      await resolveRoleAndRedirect(auth.currentUser, loginBtn);
+    } catch (err) {
+      showMsg(friendlyError(err.code), true);
+      setLoading(loginBtn, false);
+    }
+  });
+
+  // ── Google ────────────────────────────────────────────────────────
+  googleBtn.addEventListener("click", async () => {
+    setLoading(googleBtn, true);
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      await resolveRoleAndRedirect(auth.currentUser, googleBtn);
+    } catch (err) {
+      showMsg(friendlyError(err.code), true);
+      setLoading(googleBtn, false);
+    }
+  });
+</script>
+</body>
+</html>

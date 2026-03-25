@@ -1,0 +1,74 @@
+[debug] [2026-02-19T07:15:42.540Z] ----------------------------------------------------------------------
+[debug] [2026-02-19T07:15:42.549Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\einjhel\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-02-19T07:15:42.550Z] CLI Version:   15.6.0
+[debug] [2026-02-19T07:15:42.551Z] Platform:      win32
+[debug] [2026-02-19T07:15:42.551Z] Node Version:  v24.13.0
+[debug] [2026-02-19T07:15:42.551Z] Time:          Thu Feb 19 2026 15:15:42 GMT+0800 (Philippine Standard Time)
+[debug] [2026-02-19T07:15:42.551Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-19T07:15:42.556Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\einjhel\OneDrive\Desktop\InvestEd\InvestEd
+
+[debug] [2026-02-19T07:15:49.016Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-02-19T07:15:49.017Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-02-19T07:17:00.623Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-19T07:17:00.624Z] > authorizing via signed-in user (jheeeeel.zm@gmail.com)
+[debug] [2026-02-19T07:17:00.625Z] Checked if tokens are valid: false, expires at: 1769519615672
+[debug] [2026-02-19T07:17:00.626Z] Checked if tokens are valid: false, expires at: 1769519615672
+[debug] [2026-02-19T07:17:00.626Z] > refreshing access token with scopes: []
+[debug] [2026-02-19T07:17:00.628Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-19T07:17:00.628Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-19T07:17:01.165Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-19T07:17:01.166Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-19T07:17:01.182Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2026-02-19T07:17:02.214Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-19T07:17:02.214Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] 
+=== Dataconnect Setup
+[info] i  dataconnect: ensuring required API firebasedataconnect.googleapis.com is enabled... 
+[debug] [2026-02-19T07:17:04.974Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:04.975Z] Checked if tokens are valid: true, expires at: 1771489020166
+[info] i  dataconnect: ensuring required API sqladmin.googleapis.com is enabled... 
+[debug] [2026-02-19T07:17:04.977Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:04.977Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:04.977Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com [none]
+[debug] [2026-02-19T07:17:04.978Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com  x-goog-user-project=invested-163a2
+[debug] [2026-02-19T07:17:04.981Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com [none]
+[debug] [2026-02-19T07:17:04.981Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com  x-goog-user-project=invested-163a2
+[debug] [2026-02-19T07:17:06.511Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com 200
+[debug] [2026-02-19T07:17:06.512Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com [omitted]
+[warn] !  dataconnect: missing required API firebasedataconnect.googleapis.com. Enabling now... 
+[debug] [2026-02-19T07:17:06.513Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:06.513Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:06.513Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com:enable [none]
+[debug] [2026-02-19T07:17:06.513Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com:enable  x-goog-user-project=invested-163a2
+[debug] [2026-02-19T07:17:06.517Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com 200
+[debug] [2026-02-19T07:17:06.518Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com [omitted]
+[warn] !  dataconnect: missing required API sqladmin.googleapis.com. Enabling now... 
+[debug] [2026-02-19T07:17:06.518Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:06.518Z] Checked if tokens are valid: true, expires at: 1771489020166
+[debug] [2026-02-19T07:17:06.518Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com:enable [none]
+[debug] [2026-02-19T07:17:06.518Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com:enable  x-goog-user-project=invested-163a2
+[debug] [2026-02-19T07:17:17.613Z] *** [apiv2] error from fetch(https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com:enable, {"headers":{},"method":"POST"}): FetchError: request to https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/firebasedataconnect.googleapis.com:enable failed, reason: read ECONNRESET
+[debug] [2026-02-19T07:17:17.620Z] *** [apiv2] error from fetch(https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com:enable, {"headers":{},"method":"POST"}): FetchError: request to https://serviceusage.googleapis.com/v1/projects/invested-163a2/services/sqladmin.googleapis.com:enable failed, reason: read ECONNRESET
+[debug] [2026-02-19T07:17:22.626Z] Error: Timed out.
+    at Timeout._onTimeout (C:\Users\einjhel\AppData\Roaming\npm\node_modules\firebase-tools\lib\utils.js:308:49)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[error] 
+[error] Error: An unexpected error has occurred.

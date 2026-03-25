@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvestEd – Account Created</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .success-card {
+      background-color: #bbf7d0;
+    }
+
+    .success-wrap {
+      animation: cardIn 0.7s ease-out both;
+    }
+
+    .check-badge {
+      animation: checkPop 0.75s ease-out 0.45s both;
+    }
+
+    .check-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      overflow: visible;
+    }
+
+    @keyframes cardIn {
+      0% {
+        opacity: 0;
+        transform: translateY(24px) scale(0.96);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes checkPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.35);
+      }
+      70% {
+        transform: scale(1.08);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .check-stroke {
+      fill: none;
+      stroke: #16a34a;
+      stroke-width: 3.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 28;
+      stroke-dashoffset: 28;
+      animation: drawCheck 1.15s ease-in-out 0.95s infinite;
+    }
+
+    @keyframes drawCheck {
+      0% {
+        stroke-dashoffset: 28;
+      }
+      45% {
+        stroke-dashoffset: 0;
+      }
+      75% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 28;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4
+             bg-gradient-to-br from-green-50 to-emerald-100
+             text-gray-900">
+
+<!-- ===== SUCCESS CARD ===== -->
+<div class="success-wrap bg-white w-full max-w-md p-8 rounded-2xl shadow-xl text-center">
+
+  <!-- LOGO -->
+  <img src="../../assets/logo.png" class="w-24 mx-auto mb-6" />
+
+  <!-- GREEN SUCCESS BOX -->
+  <div class="success-card rounded-2xl p-6">
+
+    <!-- CHECK ICON -->
+    <div class="check-badge w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="check-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path class="check-stroke" d="M5.2 12.6L10 17.2L18.8 8.4"></path>
+      </svg>
+    </div>
+
+    <h2 class="text-lg font-semibold text-green-700 mb-2">
+      Account Created Successfully!
+    </h2>
+
+    <h3 class="font-bold mb-4">Account Details</h3>
+
+    <!-- DETAILS -->
+    <div class="space-y-2 text-sm">
+      <p>
+        Username:
+        <span id="createdUsername" class="text-red-600 font-semibold">Username</span>
+      </p>
+      <p>
+        Account ID:
+        <span id="createdAccountId" class="text-red-600 font-semibold">123456</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ACTION -->
+  <button
+    onclick="window.location.href='login.html'"
+    class="mt-6 bg-green-500 hover:bg-green-600
+           text-white px-6 py-3 rounded-lg font-semibold transition">
+    Log In
+  </button>
+</div>
+
+<script>
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+
+  const usernameEl = document.getElementById("createdUsername");
+  const accountIdEl = document.getElementById("createdAccountId");
+
+  const userRaw = localStorage.getItem("investedUser");
+  if (userRaw) {
+    const user = JSON.parse(userRaw);
+    const fallbackUsername = (user.email || "user").split("@")[0];
+    const username = `${user.firstName || ""}${user.lastName ? "." + user.lastName : ""}`
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "") || fallbackUsername;
+
+    let accountId = localStorage.getItem("investedAccountId");
+    if (!accountId) {
+      accountId = String(Math.floor(100000 + Math.random() * 900000));
+      localStorage.setItem("investedAccountId", accountId);
+    }
+
+    usernameEl.textContent = username;
+    accountIdEl.textContent = accountId;
+  }
+</script>
+
+</body>
+</html>

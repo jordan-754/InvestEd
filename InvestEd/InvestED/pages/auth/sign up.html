@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InvestEd – Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ===== BUTTONS ===== */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn:active { transform: scale(0.95); }
+
+    .btn-primary {
+      background: #16a34a;
+      color: white;
+    }
+    .btn-primary:hover { background: #15803d; }
+
+    .btn-outline {
+      border: 1px solid #d1d5db;
+    }
+    .btn-outline:hover {
+      background: #16a34a;
+      color: white;
+    }
+
+    /* ===== INPUTS ===== */
+    .input-group { position: relative; }
+
+    .input, select {
+      width: 100%;
+      padding: 0.75rem 2.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
+      transition: border-color .2s, box-shadow .2s, background-color .2s;
+      background-color: white;
+    }
+
+    .input:hover, select:hover {
+      border-color: #16a34a;
+      background-color: #f0fdf4;
+    }
+
+    .input:focus, select:focus {
+      outline: none;
+      border-color: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22,163,74,.25);
+      background-color: white;
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 0.75rem;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 0.75rem;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .toggle-password:hover {
+      color: #16a34a;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4
+             bg-gradient-to-br from-green-50 to-emerald-100
+             text-gray-900">
+
+<!-- ===== SIGN UP CARD ===== -->
+<div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
+
+  <!-- LOGO -->
+  <div class="flex justify-center mb-1">
+    <img src="../../assets/logo.png" class="w-24 h-24 object-contain" />
+  </div>
+
+  <h1 class="text-3xl font-bold text-center mb-2">Create Account</h1>
+  <p class="text-center mb-8 text-gray-600">
+    Start investing as a student
+  </p>
+
+  <!-- FORM -->
+  <form id="signupForm" class="space-y-4">
+
+    <!-- FIRST & LAST NAME -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="text-sm">First Name</label>
+        <div class="input-group">
+          <i data-lucide="user" class="input-icon w-5 h-5"></i>
+          <input id="firstName" type="text" class="input" placeholder="Name" required />
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm">Last Name</label>
+        <div class="input-group">
+          <i data-lucide="user" class="input-icon w-5 h-5"></i>
+          <input id="lastName" type="text" class="input" placeholder="Name" required />
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL -->
+    <div>
+      <label class="text-sm">Email</label>
+      <div class="input-group">
+        <i data-lucide="mail" class="input-icon w-5 h-5"></i>
+        <input id="signupEmail" type="email" class="input" placeholder="you@gmail.com" autocomplete="email" required />
+      </div>
+    </div>
+
+    <!-- BIRTHDATE -->
+    <div>
+      <label class="text-sm">Birthdate</label>
+      <div class="input-group">
+        <i data-lucide="calendar" class="input-icon w-5 h-5"></i>
+        <input id="birthdate" type="date" class="input" required />
+      </div>
+    </div>
+
+    <!-- PASSWORD -->
+    <div>
+      <label class="text-sm">Password</label>
+      <div class="input-group">
+        <i data-lucide="lock" class="input-icon w-5 h-5"></i>
+        <input id="password" type="password" class="input" placeholder="••••••••" autocomplete="new-password" required />
+        <i id="togglePassword" data-lucide="eye" class="toggle-password w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- SECURITY QUESTION -->
+    <div>
+      <label class="text-sm">Security Question</label>
+      <div class="input-group">
+        <select id="securityQuestion" required>
+          <option value="">Select a question</option>
+          <option>What is your mother’s maiden name?</option>
+          <option>What was the name of your first pet?</option>
+          <option>What city were you born in?</option>
+          <option>What is your favorite teacher’s name?</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- SECURITY ANSWER -->
+    <div>
+      <label class="text-sm">Security Answer</label>
+      <div class="input-group">
+        <i data-lucide="shield" class="input-icon w-5 h-5"></i>
+        <input id="securityAnswer" type="text" class="input" placeholder="Your answer" required />
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <p id="signupMessage" class="hidden text-sm rounded-md px-3 py-2"></p>
+
+    <button type="submit" class="btn btn-primary w-full mt-4">
+      Create Account
+    </button>
+  </form>
+
+  <p class="mt-6 text-center text-sm text-gray-500">
+    Already have an account?
+    <a href="login.html" class="text-green-600 hover:underline">Log in</a>
+  </p>
+</div>
+
+<script type="module">
+  import {
+    createUserWithEmailAndPassword,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db } from "../../js/firebase.js";
+
+  lucide.createIcons();
+
+  // Password toggle
+  document.getElementById("togglePassword").onclick = () => {
+    const p = document.getElementById("password");
+    p.type = p.type === "password" ? "text" : "password";
+  };
+
+  const signupForm = document.getElementById("signupForm");
+  const signupMessage = document.getElementById("signupMessage");
+  const birthdateInput = document.getElementById("birthdate");
+
+  function showSignupMessage(text, isError) {
+    signupMessage.textContent = text;
+    signupMessage.classList.remove("hidden", "bg-red-50", "text-red-700", "bg-green-50", "text-green-700");
+    signupMessage.classList.add(isError ? "bg-red-50" : "bg-green-50");
+    signupMessage.classList.add(isError ? "text-red-700" : "text-green-700");
+  }
+
+  function friendlySignupError(code) {
+    switch (code) {
+      case "auth/email-already-in-use": return "This email is already registered.";
+      case "auth/invalid-email": return "Please enter a valid email address.";
+      case "auth/weak-password": return "Password is too weak. Use at least 6 characters.";
+      default: return "Unable to create account. Please try again.";
+    }
+  }
+
+  signupForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const birthdateValue = birthdateInput.value;
+    if (!birthdateValue) {
+      showSignupMessage("Please select your birthdate.", true);
+      return;
+    }
+
+    const selectedDate = new Date(birthdateValue);
+    const now = new Date();
+    if (selectedDate > now) {
+      showSignupMessage("Birthdate cannot be in the future.", true);
+      return;
+    }
+
+    let age = now.getFullYear() - selectedDate.getFullYear();
+    const monthDiff = now.getMonth() - selectedDate.getMonth();
+    const dayDiff = now.getDate() - selectedDate.getDate();
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age -= 1;
+    }
+
+    if (age < 13) {
+      showSignupMessage("Age is below the required minimum (13+ only).", true);
+      return;
+    }
+
+    const profile = {
+      firstName: document.getElementById("firstName").value.trim(),
+      lastName: document.getElementById("lastName").value.trim(),
+      email: document.getElementById("signupEmail").value.trim().toLowerCase(),
+      birthdate: document.getElementById("birthdate").value,
+      password: document.getElementById("password").value,
+      securityQuestion: document.getElementById("securityQuestion").value,
+      securityAnswer: document.getElementById("securityAnswer").value.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, profile.email, profile.password);
+      const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+
+      await updateProfile(cred.user, { displayName: fullName });
+
+      await setDoc(doc(db, "users", cred.user.uid), {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+        birthdate: profile.birthdate,
+        securityQuestion: profile.securityQuestion,
+        securityAnswer: profile.securityAnswer,
+        role: "student",
+        createdAt: serverTimestamp()
+      });
+
+      localStorage.setItem("investedLastSignupEmail", profile.email);
+      localStorage.setItem(
+        "investedUser",
+        JSON.stringify({
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          email: profile.email,
+          uid: cred.user.uid
+        })
+      );
+
+      showSignupMessage("Account created successfully. Redirecting...", false);
+      setTimeout(() => {
+        window.location.href = "acc created.html";
+      }, 600);
+    } catch (err) {
+      showSignupMessage(friendlySignupError(err.code), true);
+    }
+  });
+</script>
+
+</body>
+</html>
+
+
+

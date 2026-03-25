@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Students — InvestEd Admin</title>
+  <link rel="icon" type="image/png" href="../assets/logo.png" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .toolbar .search-wrap { flex: 0 0 240px; }
+    .filter-group { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+    .select-box {
+      padding: 7px 12px; border-radius: 7px;
+      border: 1px solid var(--border); background: white;
+      font-family: 'Inter', sans-serif; font-size: 13px;
+      color: var(--text2); cursor: pointer; outline: none;
+    }
+    .sort-icon { color: var(--text3); font-size: 13px; margin-left: 4px; }
+    .col-name    { min-width: 140px; }
+    .col-school  { min-width: 160px; }
+    .col-goal    { min-width: 160px; }
+    .col-invested{ min-width: 130px; }
+    .col-interest{ min-width: 130px; }
+    .col-active  { min-width: 90px; }
+    .col-status  { min-width: 110px; }
+    .col-act     { min-width: 180px; }
+    .student-name { font-weight: 600; font-size: 13px; }
+    .view-btn {
+      padding: 5px 14px; border-radius: 6px;
+      border: 1px solid var(--border); background: white;
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      font-family: 'Inter', sans-serif; color: var(--text2); transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .view-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .money-val { font-weight: 600; color: var(--text); }
+    .interest-val { font-weight: 600; color: #16A34A; }
+    .goal-cell .goal-title    { font-weight: 500; font-size: 13px; }
+    .goal-cell .goal-progress { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .goal-none { color: var(--text3); font-size: 13px; }
+    .loading-row td { text-align: center; color: var(--text3); padding: 32px; font-size: 13px; }
+    .mini-spinner {
+      display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--border); border-top-color: var(--blue);
+      animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table { min-width: 900px; }
+    .confirm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 999;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: white; border-radius: 16px;
+      padding: 32px; width: 100%; max-width: 340px; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .confirm-icon  { font-size: 28px; margin-bottom: 12px; }
+    .confirm-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .confirm-sub   { font-size: 12px; color: #6b7280; margin-bottom: 24px; line-height: 1.5; }
+    .confirm-btns  { display: flex; gap: 10px; justify-content: center; }
+    .confirm-cancel {
+      padding: 9px 24px; border-radius: 8px;
+      border: 1px solid #d1d5db; background: white;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; color: #374151; transition: all 0.15s;
+    }
+    .confirm-cancel:hover { background: #f4f6f9; }
+    .confirm-ok {
+      padding: 9px 24px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; color: white; transition: all 0.15s;
+    }
+    .confirm-ok.danger  { background: #DC2626; }
+    .confirm-ok.success { background: #16A34A; }
+    .confirm-ok:hover   { opacity: 0.88; }
+    @media (max-width: 640px) {
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar .search-wrap { flex: 1 1 100%; }
+      .filter-group { margin-left: 0; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><img src="../assets/logo.png" alt="InvestEd logo" /></div>
+      <div class="brand-text">
+        <div class="brand-name">InvestEd Pathways</div>
+        <div class="brand-sub">Admin Panel</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="./admin.html"          class="nav-item">Dashboard</a>
+      <a href="students.html"         class="nav-item active">Students</a>
+      <a href="investments.html"      class="nav-item">Investments</a>
+      <a href="learning.html"         class="nav-item">Content &amp; Learning</a>
+      <a href="rewards.html"          class="nav-item">Rewards &amp; Badges</a>
+      <a href="rewards-exchange.html" class="nav-item">Rewards Exchange</a>
+      <a href="settings.html"         class="nav-item">Settings</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="topbar-title">Student Management</span>
+    </header>
+    <div class="content">
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input type="text" placeholder="Search students…" id="search-input" />
+        </div>
+        <div class="filter-group">
+          <span style="font-size:13px;color:var(--text2);font-weight:500">Filter by Status:</span>
+          <select class="select-box" id="status-select">
+            <option value="all students">All Students</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-scroll">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="col-name">Student Name <span class="sort-icon">⇅</span></th>
+                <th class="col-school">School / Level</th>
+                <th class="col-goal">Current Goal</th>
+                <th class="col-invested">Total Savings</th>
+                <th class="col-interest">Interest Earned (3%)</th>
+                <th class="col-active">Last Active <span class="sort-icon">⇅</span></th>
+                <th class="col-status">Status</th>
+                <th class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody id="student-table-body">
+              <tr class="loading-row">
+                <td colspan="8"><span class="mini-spinner"></span> Loading students…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-overlay" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon"  id="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-sub"   id="confirm-sub"></div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" id="confirm-cancel-btn">Cancel</button>
+      <button class="confirm-ok"     id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc, collection, getDocs, updateDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { auth, db } from "../js/firebase.js";
+
+// ── Hamburger ─────────────────────────────────────────────
+const sidebar        = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+const hamburger      = document.getElementById("hamburger");
+hamburger.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  sidebarOverlay.classList.toggle("open");
+});
+sidebarOverlay.addEventListener("click", () => {
+  sidebar.classList.remove("open");
+  sidebarOverlay.classList.remove("open");
+});
+
+const tbody        = document.getElementById("student-table-body");
+const searchInput  = document.getElementById("search-input");
+const statusSelect = document.getElementById("status-select");
+let   allStudents  = [];
+
+function showConfirm(title, sub, type = "danger") {
+  return new Promise(resolve => {
+    const modal = document.getElementById("confirm-modal");
+    document.getElementById("confirm-icon").textContent  = type === "danger" ? "⚠️" : "✅";
+    document.getElementById("confirm-title").textContent = title;
+    document.getElementById("confirm-sub").textContent   = sub;
+    const okBtn = document.getElementById("confirm-ok-btn");
+    okBtn.className = `confirm-ok ${type}`;
+    modal.classList.add("open");
+    document.getElementById("confirm-ok-btn").onclick = () => {
+      modal.classList.remove("open"); resolve(true);
+    };
+    document.getElementById("confirm-cancel-btn").onclick = () => {
+      modal.classList.remove("open"); resolve(false);
+    };
+  });
+}
+
+function badgeClass(status) {
+  const s = String(status || "").toLowerCase();
+  if (s === "active")        return "badge badge-green";
+  if (s === "needs support") return "badge badge-amber";
+  return "badge badge-red";
+}
+
+function formatDate(value) {
+  if (!value) return "—";
+  if (value?.toDate)             return value.toDate().toLocaleDateString();
+  if (typeof value === "number") return new Date(value).toLocaleDateString();
+  const p = new Date(value);
+  return Number.isNaN(p.getTime()) ? "—" : p.toLocaleDateString();
+}
+
+// ✅ Always show 2 decimal places for money
+function formatMoney(value) {
+  const n = Number(value);
+  if (value === undefined || value === null || value === "") return "—";
+  if (Number.isNaN(n)) return "—";
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function normalizeStatus(v) {
+  return String(v || "").trim().toLowerCase();
+}
+
+async function fetchActiveGoal(studentId) {
+  try {
+    const snap = await getDocs(collection(db, "users", studentId, "goals"));
+    if (snap.empty) return null;
+    // ✅ Get the most active (non-completed) goal
+    const activeDocs = snap.docs.filter(d => !d.data().isCompleted);
+    const d = (activeDocs.length > 0 ? activeDocs[0] : snap.docs[0]).data();
+    return {
+      title:         d.title         || "Untitled Goal",
+      targetAmount:  Number(d.targetAmount  || 0),
+      currentAmount: Number(d.currentAmount || 0),
+    };
+  } catch (err) { return null; }
+}
+
+async function fetchTotalInvested(studentId) {
+  try {
+    const snap = await getDocs(collection(db, "transactions"));
+    let totalInvested = 0;
+    let totalWithdrawn = 0;
+    snap.docs.forEach(d => {
+      const data   = d.data();
+      if (data.userId !== studentId) return;
+      const type   = String(data.type   || "").toLowerCase();
+      const status = String(data.status || "").toLowerCase();
+
+      if (type === "investment" && status === "approved" && !data.description) {
+        totalInvested += Number(data.amount || 0);
+      }
+
+      if ((type === "withdrawal" || type === "goal_withdrawal") && status === "approved") {
+        totalWithdrawn += Number(data.amount || 0);
+      }
+    });
+    return Math.max(0, totalInvested - totalWithdrawn);
+  } catch (err) { return 0; }
+}
+
+async function fetchInterestEarned(studentId) {
+  try {
+    const snap = await getDocs(collection(db, "users", studentId, "goals"));
+    let totalGoalSavings = 0;
+    snap.docs.forEach(d => {
+      const data    = d.data();
+      const current = Number(data.currentAmount || 0);
+      // ✅ Remove isCompleted check — include all goals with savings
+      if (current > 0) totalGoalSavings += current;
+    });
+    return totalGoalSavings * 0.03;
+  } catch (err) { return 0; }
+}
+
+function createCell(text, cls = "") {
+  const td = document.createElement("td");
+  if (cls) td.className = cls;
+  td.textContent = text;
+  return td;
+}
+
+function renderEmpty(msg) {
+  tbody.innerHTML = `
+    <tr><td colspan="8"
+      style="text-align:center;color:var(--text3);padding:28px;font-size:13px">
+      ${msg}
+    </td></tr>`;
+}
+
+function renderRow(student) {
+  const fullName    = student.fullName
+                      || [student.firstName, student.lastName].filter(Boolean).join(" ")
+                      || student.name || student.email || "—";
+  const schoolLevel = student.school || student.schoolLevel || student.level || "—";
+  const lastActive  = formatDate(
+    student.lastActiveAt || student.lastActive || student.updatedAt || student.createdAt
+  );
+  const status          = student.status || "active";
+  const investedDisplay = formatMoney(student._totalInvested ?? 0);
+  const interestDisplay = student._interestEarned > 0
+    ? formatMoney(student._interestEarned)
+    : "₱0.00";
+
+  const tr = document.createElement("tr");
+
+  const nameTd   = document.createElement("td");
+  const nameSpan = document.createElement("span");
+  nameSpan.className   = "student-name";
+  nameSpan.textContent = fullName;
+  nameTd.appendChild(nameSpan);
+
+  const goalTd = document.createElement("td");
+  if (student._goal) {
+    const g   = student._goal;
+    const pct = g.targetAmount > 0
+      ? ((g.currentAmount / g.targetAmount) * 100).toFixed(1) : "0.0";
+    goalTd.innerHTML = `
+      <div class="goal-cell">
+        <div class="goal-title">${g.title}</div>
+        <div class="goal-progress">
+          ₱${g.currentAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} /
+          ₱${g.targetAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · ${pct}%
+        </div>
+      </div>`;
+  } else {
+    goalTd.innerHTML = `<span class="goal-none">No goal set</span>`;
+  }
+
+  const statusTd    = document.createElement("td");
+  const statusBadge = document.createElement("span");
+  statusBadge.className   = badgeClass(status);
+  statusBadge.textContent = status;
+  statusTd.appendChild(statusBadge);
+
+  const actionTd = document.createElement("td");
+  actionTd.style.display  = "flex";
+  actionTd.style.gap      = "6px";
+  actionTd.style.flexWrap = "wrap";
+
+  const btn = document.createElement("button");
+  btn.className   = "view-btn";
+  btn.textContent = "View Profile";
+  btn.onclick     = () =>
+    window.location.href = `student-account.html?id=${encodeURIComponent(student.id)}`;
+
+  const isActive  = normalizeStatus(status) === "active";
+  const toggleBtn = document.createElement("button");
+  toggleBtn.className         = "view-btn";
+  toggleBtn.textContent       = isActive ? "Set Inactive" : "Set Active";
+  toggleBtn.style.color       = isActive ? "#DC2626" : "#16A34A";
+  toggleBtn.style.borderColor = isActive ? "#FECACA" : "#BBF7D0";
+  toggleBtn.onclick = async () => {
+    const newStatus = isActive ? "inactive" : "active";
+    const type      = isActive ? "danger" : "success";
+    const confirmed = await showConfirm(
+      `Set student as ${newStatus}?`,
+      `This will update ${fullName}'s status in Firestore immediately.`,
+      type
+    );
+    if (!confirmed) return;
+    try {
+      await updateDoc(doc(db, "users", student.id), { status: newStatus });
+      const idx = allStudents.findIndex(x => x.id === student.id);
+      if (idx !== -1) allStudents[idx].status = newStatus;
+      applyFilters();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  actionTd.appendChild(btn);
+  actionTd.appendChild(toggleBtn);
+
+  tr.appendChild(nameTd);
+  tr.appendChild(createCell(schoolLevel));
+  tr.appendChild(goalTd);
+  tr.appendChild(createCell(investedDisplay, "money-val"));
+  tr.appendChild(createCell(interestDisplay, "interest-val"));
+  tr.appendChild(createCell(lastActive));
+  tr.appendChild(statusTd);
+  tr.appendChild(actionTd);
+  tbody.appendChild(tr);
+}
+
+function renderStudents(list) {
+  tbody.innerHTML = "";
+  list.forEach(renderRow);
+}
+
+function applyFilters() {
+  if (allStudents.length === 0) return;
+  const q      = searchInput.value.trim().toLowerCase();
+  const status = normalizeStatus(statusSelect.value);
+  const filtered = allStudents.filter(s => {
+    const name   = s.fullName || [s.firstName, s.lastName].filter(Boolean).join(" ") || s.name || "";
+    const school = s.school || s.schoolLevel || s.level || "";
+    const goal   = s._goal?.title || "";
+    const email  = s.email || "";
+    const sts    = normalizeStatus(s.status || "active");
+    const matchSearch = !q ||
+      [name, school, goal, email].join(" ").toLowerCase().includes(q);
+    const matchStatus = status === "all students" || sts === status;
+    return matchSearch && matchStatus;
+  });
+  filtered.length === 0
+    ? renderEmpty("No students match your search/filter.")
+    : renderStudents(filtered);
+}
+
+async function loadStudents() {
+  try {
+    tbody.innerHTML = `
+      <tr class="loading-row">
+        <td colspan="8"><span class="mini-spinner"></span> Loading students…</td>
+      </tr>`;
+    const snap     = await getDocs(collection(db, "users"));
+    const students = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if ((data.role || "student").toLowerCase() === "student") {
+        students.push({ id: d.id, ...data });
+      }
+    });
+    if (students.length === 0) { renderEmpty("No student records yet."); return; }
+    allStudents = students.map(s => ({ ...s, _goal: null, _totalInvested: 0, _interestEarned: 0 }));
+    applyFilters();
+
+    for (const s of students) {
+      const [goal, totalInvested, interestEarned] = await Promise.all([
+        fetchActiveGoal(s.id),
+        fetchTotalInvested(s.id),
+        fetchInterestEarned(s.id),
+      ]);
+      const idx = allStudents.findIndex(x => x.id === s.id);
+      if (idx !== -1) {
+        allStudents[idx] = {
+          ...allStudents[idx],
+          _goal:           goal,
+          _totalInvested:  totalInvested,
+          _interestEarned: interestEarned,
+        };
+      }
+    }
+    applyFilters();
+  } catch (err) {
+    console.error("loadStudents error:", err);
+    renderEmpty(`Error: ${err.message}`);
+  }
+}
+
+searchInput.addEventListener("input",   applyFilters);
+statusSelect.addEventListener("change", applyFilters);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "../pages/auth/login.html"; return; }
+  const userSnap = await getDoc(doc(db, "users", user.uid));
+  if (!userSnap.exists() || (userSnap.data().role || "").toLowerCase() !== "admin") {
+    await signOut(auth); window.location.href = "../pages/auth/login.html"; return;
+  }
+  loadStudents();
+});
+</script>
+</body>
+</html>
